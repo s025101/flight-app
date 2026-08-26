@@ -31,20 +31,20 @@ def get_flight():
 @app.route('/api/fetch-live-flight', methods=['POST'])
 def fetch_live_flight():
     global flight_data
-    req_data = request.get_json() or {}
-    airport_code = req_data.get('airport_code', 'HND').upper()
-    target_gate_raw = str(req_data.get('gate_number', '')).strip()
-    
-    # 入力から数字のみを抽出し比較用に保持
-    target_gate_num = re.sub(r'\D', '', target_gate_raw)
-
     try:
+        req_data = request.get_json() or {}
+        airport_code = req_data.get('airport_code', 'HND').upper()
+        target_gate_raw = str(req_data.get('gate_number', '')).strip()
+        
+        # 入力から数字のみを抽出し比較用に保持
+        target_gate_num = re.sub(r'\D', '', target_gate_raw)
+
         url = f"https://api.flightradar24.com/common/v1/airport.json?code={airport_code}&plugin[]=&plugin-setting[schedule][mode]=departures&plugin-setting[schedule][timestamp]={int(datetime.now().timestamp())}&page=1&limit=100"
         
         resp = impersonate_requests.get(url, impersonate="chrome110", timeout=10)
         
         if resp.status_code != 200:
-            return jsonify({"status": "error", "message": f"HTTP {resp.status_code} エラーが発生しました"})
+            return jsonify({"status": "error", "message": f"FR24 API エラー: HTTP {resp.status_code}"})
 
         data = resp.json()
         plugin_data = data.get("result", {}).get("response", {}).get("airport", {}).get("pluginData", {})
@@ -80,7 +80,7 @@ def fetch_live_flight():
                 matched_flight = flight
                 break
 
-        # もし入力したゲート番号が見つからず、APIにゲート情報がない便が多い場合はフォールバック
+        # 該当するゲートの便がない場合、先頭の便をフォールバックとして使用
         if not matched_flight and departures:
             matched_flight = departures[0].get("flight", {})
 
@@ -113,8 +113,8 @@ def fetch_live_flight():
             })
 
     except Exception as e:
-        print("取得例外:", e)
-        return jsonify({"status": "error", "message": f"通信例外: {str(e)}"})
+        print("取得例外エラー:", str(e))
+        return jsonify({"status": "error", "message": f"サーバー内部エラーが発生しました: {str(e)}"})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
