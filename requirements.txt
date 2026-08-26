@@ -1,4 +1,4 @@
-Flask
+flask
 requests
-curl_cffi
 gunicorn
+FlightRadarAPI
