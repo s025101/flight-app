@@ -1,7 +1,6 @@
 from flask import Flask, render_template, jsonify, request
 import requests
 from datetime import datetime
-from FlightRadarAPI import FlightRadar24API
 
 app = Flask(__name__)
 
@@ -9,7 +8,6 @@ app = Flask(__name__)
 headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 }
-fr_api = FlightRadar24API()
 
 AIRPORT_COORDS = {
     "羽田": {"lat": 35.5494, "lon": 139.7798},
@@ -89,13 +87,13 @@ def fetch_live_flight():
     target_gate = str(req_data.get('gate_number', '5')).strip()
 
     try:
-        # FlightRadar24のWeb APIエンドポイントへ直接リクエスト（Renderからのブロック対策ヘッダー付き）
+        # FlightRadar24 APIへのリクエスト
         url = f"https://api.flightradar24.com/common/v1/airport.json?code={airport_code}&plugin[]=&plugin-setting[schedule][mode]=departures&plugin-setting[schedule][timestamp]={int(datetime.now().timestamp())}&page=1&limit=100"
         
         resp = requests.get(url, headers=headers, timeout=10)
         
         if resp.status_code != 200:
-            return jsonify({"status": "error", "message": f"FlightRadar24通信エラー (HTTP {resp.status_code})"}).strip()
+            return jsonify({"status": "error", "message": f"FlightRadar24通信エラー (HTTP {resp.status_code})"})
 
         data = resp.json()
         
@@ -113,7 +111,7 @@ def fetch_live_flight():
         for item in departures:
             flight = item.get("flight", {})
             
-            # ゲート番号の抽出 (複数パターンに対応)
+            # ゲート番号の抽出
             gate = flight.get("status", {}).get("generic", {}).get("gate", {})
             gate_number = ""
             if isinstance(gate, dict):
