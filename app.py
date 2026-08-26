@@ -4,7 +4,7 @@ from datetime import datetime
 
 app = Flask(__name__)
 
-# 空港ごとの緯度・経度マッピング（天気取得用）
+# 空港ごとの緯度・経度マッピング（部分一致でも拾えるようにキーを整理）
 AIRPORT_COORDS = {
     "羽田": {"lat": 35.5494, "lon": 139.7798},
     "成田": {"lat": 35.7647, "lon": 140.3863},
@@ -65,10 +65,16 @@ def update_flight_data():
 @app.route('/api/weather', methods=['GET'])
 def get_weather():
     dest = request.args.get('destination', '伊丹')
-    coords = AIRPORT_COORDS.get(dest, AIRPORT_COORDS["伊丹"])
+    
+    # 送られてきた文字列（例: "大阪/伊丹" や "東京/羽田"）から、対応する座標を賢く探す
+    target_coords = AIRPORT_COORDS["伊丹"] # デフォルト
+    for key, coords in AIRPORT_COORDS.items():
+        if key in dest:
+            target_coords = coords
+            break
     
     try:
-        url = f"https://api.open-meteo.com/v1/forecast?latitude={coords['lat']}&longitude={coords['lon']}&current_weather=true"
+        url = f"https://api.open-meteo.com/v1/forecast?latitude={target_coords['lat']}&longitude={target_coords['lon']}&current_weather=true"
         response = requests.get(url, timeout=5)
         data = response.json()
         
@@ -82,21 +88,6 @@ def get_weather():
         print("天気API取得エラー:", e)
         
     return jsonify({"icon": "☀️", "temp": "--°C"})
-
-@app.route('/api/fetch-live-flight', methods=['POST'])
-def fetch_live_flight():
-    # リアルタイム自動取得ボタンが押された時の処理
-    # ここにFlightRadarAPIなどの処理を後から追加できますが、
-    # まずは現在のflight_dataをそのまま返すようにしてエラーを防ぎます
-    req_data = request.get_json()
-    if req_data and 'gate_number' in req_data:
-        flight_data['gate'] = req_data['gate_number']
-        
-    return jsonify({
-        "status": "success",
-        "message": "データを更新しました",
-        "data": flight_data
-    })
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
