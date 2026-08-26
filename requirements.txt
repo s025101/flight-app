@@ -1,4 +1,4 @@
 flask
 requests
 gunicorn
-FlightRadar24API
+flightradar24api
