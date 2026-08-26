@@ -1,5 +1,3 @@
-flask
+Flask
 requests
-gunicorn
-FlightRadarAPI
-cloudscraper
+curl_cffi
