@@ -1,7 +1,34 @@
 from flask import Flask, render_template, jsonify, request
 import requests
+from datetime import datetime
 
 app = Flask(__name__)
+
+# 空港ごとの緯度・経度マッピング（天気取得用）
+AIRPORT_COORDS = {
+    "羽田": {"lat": 35.5494, "lon": 139.7798},
+    "成田": {"lat": 35.7647, "lon": 140.3863},
+    "伊丹": {"lat": 34.7855, "lon": 135.4382},
+    "関西": {"lat": 34.4320, "lon": 135.2304},
+    "福岡": {"lat": 33.5859, "lon": 130.4507},
+    "新千歳": {"lat": 42.7752, "lon": 141.6923},
+    "中部": {"lat": 34.8583, "lon": 136.8053},
+    "那覇": {"lat": 26.1958, "lon": 127.6458}
+}
+
+# WMO天気コードを絵文字に変換する辞書
+WEATHER_ICONS = {
+    0: "☀️",          # 快晴
+    1: "🌤️",          # ほぼ晴れ
+    2: "⛅",          # 一部曇り
+    3: "☁️",          # 曇り
+    45: "🌫️", 48: "🌫️", # 霧
+    51: "🌧️", 53: "🌧️", 55: "🌧️", # しとしと雨
+    61: "☔", 63: "☔", 65: "☔", # 雨
+    71: "❄️", 73: "❄️", 75: "❄️", # 雪
+    80: "🌦️", 81: "🌦️", 82: "🌦️", # 俄か雨
+    95: "⚡", 96: "⚡", 99: "⚡"  # 雷雨
+}
 
 # 初期データの保持
 flight_data = {
@@ -14,14 +41,13 @@ flight_data = {
     "flight_no": "ANA420",
     "departure_time": "07:10",
     "boarding_time": "06:50",
-    "weather_icon": "☀️☁️",
+    "weather_icon": "☀️",
     "weather_temp": "21°C",
-    "weather_date": "8月25日"
+    "weather_date": datetime.now().strftime("%m月%d日")
 }
 
 @app.route('/')
 def index():
-    # templates/main.html を読み込んで表示する
     return render_template('main.html')
 
 @app.route('/api/flight-data', methods=['GET'])
@@ -39,12 +65,27 @@ def update_flight_data():
 @app.route('/api/weather', methods=['GET'])
 def get_weather():
     dest = request.args.get('destination', '伊丹')
-    # 簡易天気データ（必要に応じて外部API連携可能）
-    return jsonify({"icon": "☀️☁️", "temp": "21°C"})
+    coords = AIRPORT_COORDS.get(dest, AIRPORT_COORDS["伊丹"])
+    
+    try:
+        # Open-Meteo APIからリアルタイム天気を取得
+        url = f"https://api.open-meteo.com/v1/forecast?latitude={coords['lat']}&longitude={coords['lon']}&current_weather=true"
+        response = requests.get(url, timeout=5)
+        data = response.json()
+        
+        if "current_weather" in data:
+            current = data["current_weather"]
+            temp = f"{round(current['temperature'])}°C"
+            weather_code = current.get("weathercode", 0)
+            icon = WEATHER_ICONS.get(weather_code, "☀️")
+            return jsonify({"icon": icon, "temp": temp})
+    except Exception as e:
+        print("天気API取得エラー:", e)
+        
+    return jsonify({"icon": "☀️", "temp": "--°C"})
 
 @app.route('/api/fetch-live-flight', methods=['POST'])
 def fetch_live_flight():
-    # リアルタイム取得処理のプレースホルダー
     return jsonify({"status": "error", "message": "リアルタイム取得機能は準備中です"})
 
 if __name__ == '__main__':
