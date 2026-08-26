@@ -1,7 +1,8 @@
 from flask import Flask, render_template, jsonify, request
 import requests
 from datetime import datetime
-from FlightRadar24 import FlightRadar24API
+# モジュール名をすべて小文字の flightradar24 に修正
+from flightradar24 import FlightRadar24API
 
 app = Flask(__name__)
 
@@ -87,13 +88,11 @@ def fetch_live_flight():
     target_gate = str(req_data.get('gate_number', '5')).strip()
 
     try:
-        # FlightRadar24から空港の発着スケジュールを取得
         details = fr_api.get_airport_details(airport_code)
         plugin_data = details.get("pluginData", {}).get("schedule", {})
         departures = plugin_data.get("departures", {}).get("data", [])
 
         matched_flight = None
-        # 指定されたゲート番号に一致する出発便を検索
         for item in departures:
             flight = item.get("flight", {})
             gate = flight.get("status", {}).get("generic", {}).get("gate", {})
@@ -104,12 +103,10 @@ def fetch_live_flight():
                 break
 
         if matched_flight:
-            # 航空会社コード・便名・目的地・時刻等の抽出
             airline_code = matched_flight.get("airline", {}).get("code", {}).get("ica0", "ANA")
             flight_no = matched_flight.get("identification", {}).get("number", {}).get("default", "ANA000")
             dest_name = matched_flight.get("airport", {}).get("destination", {}).get("name", "OSAKA")
             
-            # 定刻 (STD)
             std_timestamp = matched_flight.get("time", {}).get("scheduled", {}).get("departure")
             dep_time = datetime.fromtimestamp(std_timestamp).strftime("%H:%M") if std_timestamp else "00:00"
 
