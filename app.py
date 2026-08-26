@@ -1,13 +1,18 @@
 from flask import Flask, render_template, jsonify, request
 import requests
+import cloudscraper
 from datetime import datetime
 
 app = Flask(__name__)
 
-# User-Agentを設定してCloudflareなどのブロックを回避
-headers = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-}
+# Cloudflare回避用のスクレイパーを作成
+scraper = cloudscraper.create_scraper(
+    browser={
+        'browser': 'chrome',
+        'platform': 'windows',
+        'desktop': True
+    }
+)
 
 AIRPORT_COORDS = {
     "羽田": {"lat": 35.5494, "lon": 139.7798},
@@ -87,17 +92,16 @@ def fetch_live_flight():
     target_gate = str(req_data.get('gate_number', '5')).strip()
 
     try:
-        # FlightRadar24 APIへのリクエスト
         url = f"https://api.flightradar24.com/common/v1/airport.json?code={airport_code}&plugin[]=&plugin-setting[schedule][mode]=departures&plugin-setting[schedule][timestamp]={int(datetime.now().timestamp())}&page=1&limit=100"
         
-        resp = requests.get(url, headers=headers, timeout=10)
+        # cloudscraper経由でリクエストを実行
+        resp = scraper.get(url, timeout=10)
         
         if resp.status_code != 200:
             return jsonify({"status": "error", "message": f"FlightRadar24通信エラー (HTTP {resp.status_code})"})
 
         data = resp.json()
         
-        # ネストされたデータの安全な取得
         plugin_data = data.get("result", {}).get("response", {}).get("airport", {}).get("pluginData", {})
         schedule = plugin_data.get("schedule", {})
         departures = schedule.get("departures", {}).get("data", [])
@@ -110,8 +114,6 @@ def fetch_live_flight():
 
         for item in departures:
             flight = item.get("flight", {})
-            
-            # ゲート番号の抽出
             gate = flight.get("status", {}).get("generic", {}).get("gate", {})
             gate_number = ""
             if isinstance(gate, dict):
