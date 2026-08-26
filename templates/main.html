@@ -27,12 +27,10 @@
       transition: margin-left 0.3s ease;
       flex-shrink: 0;
     }
-    /* 非表示時のスタイル */
     .admin-panel.collapsed {
       margin-left: -360px;
     }
 
-    /* パネル開閉トグルボタン */
     .toggle-panel-btn {
       position: absolute;
       top: 15px;
@@ -54,7 +52,7 @@
     }
 
     .admin-panel h3 {
-      margin-top: 30px; /* ボタンと被らないよう上部余白を設定 */
+      margin-top: 30px;
       color: #0052cc;
       border-bottom: 2px solid #0052cc;
       padding-bottom: 5px;
@@ -168,7 +166,6 @@
       position: relative;
     }
 
-    /* 準備中モード画面 */
     .standby-screen {
       position: absolute;
       top: 0;
@@ -201,7 +198,6 @@
       object-fit: contain;
     }
 
-    /* ヘッダー領域 */
     .row-header {
       height: 22%;
       display: flex;
@@ -239,7 +235,6 @@
     }
     .clock-time { font-size: 3.6rem; font-weight: bold; font-family: monospace; }
 
-    /* メイン領域 */
     .row-main {
       flex-grow: 1;
       display: flex;
@@ -287,7 +282,6 @@
     .weather-temp { font-size: 2.6rem; font-weight: bold; }
     .weather-date { font-size: 1.1rem; color: #aaaaaa; margin-top: 3px; font-weight: bold; }
 
-    /* 下部時間表記 */
     .row-time {
       height: 26%;
       background-color: #1a1a2a;
@@ -315,12 +309,10 @@
 </head>
 <body>
 
-  <!-- パネル開閉ボタン -->
   <button type="button" class="toggle-panel-btn" id="btnTogglePanel" onclick="toggleAdminPanel()">
     ◀ パネルを閉じる
   </button>
 
-  <!-- 左側: コントロールパネル -->
   <div class="admin-panel" id="adminPanel">
     <h3>コントロールパネル</h3>
     
@@ -328,7 +320,6 @@
       📺 準備中画面（ロゴ表示）に切り替え
     </button>
 
-    <!-- リアルタイムデータ取得セクション -->
     <div class="section-title">📡 リアルタイム自動取得 (FR24)</div>
     <div class="row">
       <div class="form-group">
@@ -353,7 +344,6 @@
 
     <hr style="border:0; border-top:1px solid #ccc; margin:15px 0;">
 
-    <!-- 手動入力セクション -->
     <div class="section-title">✏️ 手動設定・調整</div>
     <form id="adminForm">
       
@@ -444,11 +434,9 @@
     </form>
   </div>
 
-  <!-- 右側: 案内板表示部 -->
   <div class="display-panel">
     <div class="fids-board">
       
-      <!-- 準備中画面 -->
       <div class="standby-screen hidden" id="standbyScreen">
         <div class="standby-logo-box">
           <img src="" id="disp_standby_logo" alt="AIRLINE LOGO" onerror="handleImageError(this)">
@@ -515,7 +503,6 @@
     let isPanelOpen = true;
     let currentAirlineCode = "ANA";
 
-    // パネル開閉トグル関数
     function toggleAdminPanel() {
       isPanelOpen = !isPanelOpen;
       const panel = document.getElementById('adminPanel');
@@ -568,8 +555,10 @@
     }
 
     async function autoFetchWeather() {
-      const destVal = document.getElementById('destination').value;
-      const destJa = destVal.split('|')[0];
+      const destSelect = document.getElementById('destination');
+      const destVal = destSelect.value;
+      const destJa = destVal.includes('|') ? destVal.split('|')[0] : destVal;
+
       try {
         const res = await fetch(`/api/weather?destination=${encodeURIComponent(destJa)}`);
         const weatherData = await res.json();
