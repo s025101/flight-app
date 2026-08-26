@@ -12,7 +12,8 @@ AIRPORT_COORDS = {
     "関西": {"lat": 34.4320, "lon": 135.2304},
     "福岡": {"lat": 33.5859, "lon": 130.4507},
     "新千歳": {"lat": 42.7752, "lon": 141.6923},
-    "那覇": {"lat": 26.1958, "lon": 127.6458}
+    "那覇": {"lat": 26.1958, "lon": 127.6458},
+    "中部": {"lat": 34.8584, "lon": 136.8053}
 }
 
 # WMO天気コードを絵文字に変換する辞書
@@ -64,7 +65,10 @@ def update_flight_data():
 def get_weather():
     dest = request.args.get('destination', '伊丹')
     
+    # デフォルトの座標（伊丹）
     target_coords = AIRPORT_COORDS["伊丹"]
+    
+    # 部分一致で空港を検索
     for key, coords in AIRPORT_COORDS.items():
         if key in dest:
             target_coords = coords
