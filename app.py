@@ -1,11 +1,10 @@
-import os
 from flask import Flask, render_template, jsonify, request
 import requests
 from datetime import datetime
 
 app = Flask(__name__)
 
-# 空港ごとの緯度・経度マッピング
+# 空港ごとの緯度・経度マッピング（天気取得用）
 AIRPORT_COORDS = {
     "羽田": {"lat": 35.5494, "lon": 139.7798},
     "成田": {"lat": 35.7647, "lon": 140.3863},
@@ -13,24 +12,25 @@ AIRPORT_COORDS = {
     "関西": {"lat": 34.4320, "lon": 135.2304},
     "福岡": {"lat": 33.5859, "lon": 130.4507},
     "新千歳": {"lat": 42.7752, "lon": 141.6923},
-    "那覇": {"lat": 26.1958, "lon": 127.6458},
-    "中部": {"lat": 34.8584, "lon": 136.8053}
+    "中部": {"lat": 34.8583, "lon": 136.8053},
+    "那覇": {"lat": 26.1958, "lon": 127.6458}
 }
 
 # WMO天気コードを絵文字に変換する辞書
 WEATHER_ICONS = {
-    0: "☀️",
-    1: "🌤️",
-    2: "⛅",
-    3: "☁️",
-    45: "🌫️", 48: "🌫️",
-    51: "🌧️", 53: "🌧️", 55: "🌧️",
-    61: "☔", 63: "☔", 65: "☔",
-    71: "❄️", 73: "❄️", 75: "❄️",
-    80: "🌦️", 81: "🌦️", 82: "🌦️",
-    95: "⚡", 96: "⚡", 99: "⚡"
+    0: "☀️",          # 快晴
+    1: "🌤️",          # ほぼ晴れ
+    2: "⛅",          # 一部曇り
+    3: "☁️",          # 曇り
+    45: "🌫️", 48: "🌫️", # 霧
+    51: "🌧️", 53: "🌧️", 55: "🌧️", # しとしと雨
+    61: "☔", 63: "☔", 65: "☔", # 雨
+    71: "❄️", 73: "❄️", 75: "❄️", # 雪
+    80: "🌦️", 81: "🌦️", 82: "🌦️", # 俄か雨
+    95: "⚡", 96: "⚡", 99: "⚡"  # 雷雨
 }
 
+# 初期データの保持
 flight_data = {
     "gate": "5",
     "title_ja": "搭乗ご案内",
@@ -43,7 +43,7 @@ flight_data = {
     "boarding_time": "06:50",
     "weather_icon": "☀️",
     "weather_temp": "21°C",
-    "weather_date": "8月25日"
+    "weather_date": datetime.now().strftime("%m月%d日")
 }
 
 @app.route('/')
@@ -65,18 +65,11 @@ def update_flight_data():
 @app.route('/api/weather', methods=['GET'])
 def get_weather():
     dest = request.args.get('destination', '伊丹')
+    coords = AIRPORT_COORDS.get(dest, AIRPORT_COORDS["伊丹"])
     
-    # デフォルトの座標（伊丹）
-    target_coords = AIRPORT_COORDS["伊丹"]
-    
-    # 部分一致で空港を検索
-    for key, coords in AIRPORT_COORDS.items():
-        if key in dest:
-            target_coords = coords
-            break
-            
     try:
-        url = f"https://api.open-meteo.com/v1/forecast?latitude={target_coords['lat']}&longitude={target_coords['lon']}&current_weather=true"
+        # Open-Meteo APIからリアルタイム天気を取得
+        url = f"https://api.open-meteo.com/v1/forecast?latitude={coords['lat']}&longitude={coords['lon']}&current_weather=true"
         response = requests.get(url, timeout=5)
         data = response.json()
         
@@ -93,16 +86,7 @@ def get_weather():
 
 @app.route('/api/fetch-live-flight', methods=['POST'])
 def fetch_live_flight():
-    req_data = request.get_json()
-    if req_data and 'gate_number' in req_data:
-        flight_data['gate'] = req_data['gate_number']
-        
-    return jsonify({
-        "status": "success",
-        "message": "データを更新しました",
-        "data": flight_data
-    })
+    return jsonify({"status": "error", "message": "リアルタイム取得機能は準備中です"})
 
 if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port)
+    app.run(host='0.0.0.0', port=5000, debug=True)
