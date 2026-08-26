@@ -3,10 +3,8 @@ from datetime import datetime
 from flask import Flask, render_template, request, jsonify
 from curl_cffi import requests as impersonate_requests
 
-# Flaskアプリの初期化
 app = Flask(__name__)
 
-# グローバルなフライトデータ構造
 flight_data = {
     "gate": "5",
     "title_ja": "ご搭乗中",
@@ -36,7 +34,7 @@ def fetch_live_flight():
         airport_code = req_data.get('airport_code', 'HND').upper()
         target_gate_raw = str(req_data.get('gate_number', '')).strip()
         
-        # 入力から数字のみを抽出し比較用に保持
+        # 入力文字列から数字のみを抽出（例: "Gate 54" -> "54"）
         target_gate_num = re.sub(r'\D', '', target_gate_raw)
 
         url = f"https://api.flightradar24.com/common/v1/airport.json?code={airport_code}&plugin[]=&plugin-setting[schedule][mode]=departures&plugin-setting[schedule][timestamp]={int(datetime.now().timestamp())}&page=1&limit=100"
@@ -44,14 +42,14 @@ def fetch_live_flight():
         resp = impersonate_requests.get(url, impersonate="chrome110", timeout=10)
         
         if resp.status_code != 200:
-            return jsonify({"status": "error", "message": f"FR24 API エラー: HTTP {resp.status_code}"})
+            return jsonify({"status": "error", "message": f"API取得失敗: HTTP {resp.status_code}"})
 
         data = resp.json()
         plugin_data = data.get("result", {}).get("response", {}).get("airport", {}).get("pluginData", {})
         departures = plugin_data.get("schedule", {}).get("departures", {}).get("data", [])
 
         if not departures:
-            return jsonify({"status": "error", "message": f"空港コード ({airport_code}) の出発データが見つかりませんでした"})
+            return jsonify({"status": "error", "message": f"空港（{airport_code}）の出発データが見つかりません"})
 
         matched_flight = None
         found_gates_log = []
@@ -59,6 +57,7 @@ def fetch_live_flight():
         for item in departures:
             flight = item.get("flight", {})
             gate = flight.get("status", {}).get("generic", {}).get("gate", {})
+            flight_no = flight.get("identification", {}).get("number", {}).get("default", "")
             
             raw_gate_str = ""
             if isinstance(gate, dict):
@@ -69,21 +68,21 @@ def fetch_live_flight():
             if raw_gate_str:
                 found_gates_log.append(raw_gate_str)
 
-            # ゲート照合（完全一致 / 部分一致 / 数字のみの一致）
             api_gate_num = re.sub(r'\D', '', raw_gate_str)
             
+            # 【判定条件】
+            # 1. ゲート番号（完全一致 / 数字一致 / 部分一致）
+            # 2. 便名（例: "ANA420" や "420" を入力した場合にもヒットさせる）
             if target_gate_raw and (
                 target_gate_raw.upper() == raw_gate_str.upper() or
                 (target_gate_num and target_gate_num == api_gate_num) or
-                (target_gate_raw in raw_gate_str)
+                (target_gate_raw in raw_gate_str) or
+                (target_gate_raw.upper() in flight_no.upper())
             ):
                 matched_flight = flight
                 break
 
-        # 該当するゲートの便がない場合、先頭の便をフォールバックとして使用
-        if not matched_flight and departures:
-            matched_flight = departures[0].get("flight", {})
-
+        # 判定に合格したフライトのみを反映（自動フォールバックは削除）
         if matched_flight:
             airline_code = matched_flight.get("airline", {}).get("code", {}).get("icao", "ANA")
             flight_no = matched_flight.get("identification", {}).get("number", {}).get("default", "ANA000")
@@ -106,15 +105,16 @@ def fetch_live_flight():
             })
             return jsonify({"status": "success", "data": flight_data})
         else:
-            gates_preview = ", ".join(list(set(found_gates_log))[:10]) if found_gates_log else "（なし）"
+            # マッチしなかった場合はエラーを返し、現在APIから取れている実際のゲート情報例を表示する
+            gates_preview = ", ".join(list(set(found_gates_log))[:10]) if found_gates_log else "ゲート情報なし"
             return jsonify({
                 "status": "error", 
-                "message": f"ゲート「{target_gate_raw}」の便が見つかりませんでした。\n\n【現在APIで取得できている表記例】\n[{gates_preview}]"
+                "message": f"「{target_gate_raw}」に一致する便・ゲートが見つかりませんでした。\n\n【現在APIで確認できる主なゲート一覧】\n[{gates_preview}]"
             })
 
     except Exception as e:
-        print("取得例外エラー:", str(e))
-        return jsonify({"status": "error", "message": f"サーバー内部エラーが発生しました: {str(e)}"})
+        print("例外エラー:", str(e))
+        return jsonify({"status": "error", "message": f"処理エラー: {str(e)}"})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
