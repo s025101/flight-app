@@ -4,7 +4,7 @@ from datetime import datetime
 
 app = Flask(__name__)
 
-# 空港ごとの緯度・経度マッピング（部分一致でも拾えるようにキーを整理）
+# 空港ごとの緯度・経度マッピング（日本語の行き先名に対応）
 AIRPORT_COORDS = {
     "羽田": {"lat": 35.5494, "lon": 139.7798},
     "成田": {"lat": 35.7647, "lon": 140.3863},
@@ -12,7 +12,6 @@ AIRPORT_COORDS = {
     "関西": {"lat": 34.4320, "lon": 135.2304},
     "福岡": {"lat": 33.5859, "lon": 130.4507},
     "新千歳": {"lat": 42.7752, "lon": 141.6923},
-    "中部": {"lat": 34.8583, "lon": 136.8053},
     "那覇": {"lat": 26.1958, "lon": 127.6458}
 }
 
@@ -43,7 +42,7 @@ flight_data = {
     "boarding_time": "06:50",
     "weather_icon": "☀️",
     "weather_temp": "21°C",
-    "weather_date": datetime.now().strftime("%m月%d日")
+    "weather_date": "8月25日"
 }
 
 @app.route('/')
@@ -66,13 +65,13 @@ def update_flight_data():
 def get_weather():
     dest = request.args.get('destination', '伊丹')
     
-    # 送られてきた文字列（例: "大阪/伊丹" や "東京/羽田"）から、対応する座標を賢く探す
-    target_coords = AIRPORT_COORDS["伊丹"] # デフォルト
+    # 送られてきた行き先名（例：「羽田」「伊丹」など）から座標を特定
+    target_coords = AIRPORT_COORDS.get("伊丹") # デフォルト
     for key, coords in AIRPORT_COORDS.items():
         if key in dest:
             target_coords = coords
             break
-    
+            
     try:
         url = f"https://api.open-meteo.com/v1/forecast?latitude={target_coords['lat']}&longitude={target_coords['lon']}&current_weather=true"
         response = requests.get(url, timeout=5)
@@ -88,6 +87,18 @@ def get_weather():
         print("天気API取得エラー:", e)
         
     return jsonify({"icon": "☀️", "temp": "--°C"})
+
+@app.route('/api/fetch-live-flight', methods=['POST'])
+def fetch_live_flight():
+    req_data = request.get_json()
+    if req_data and 'gate_number' in req_data:
+        flight_data['gate'] = req_data['gate_number']
+        
+    return jsonify({
+        "status": "success",
+        "message": "データを更新しました",
+        "data": flight_data
+    })
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
