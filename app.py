@@ -1,18 +1,8 @@
 from flask import Flask, render_template, jsonify, request
 import requests
-import cloudscraper
 from datetime import datetime
 
 app = Flask(__name__)
-
-# Cloudflare回避用のスクレイパーを作成
-scraper = cloudscraper.create_scraper(
-    browser={
-        'browser': 'chrome',
-        'platform': 'windows',
-        'desktop': True
-    }
-)
 
 AIRPORT_COORDS = {
     "羽田": {"lat": 35.5494, "lon": 139.7798},
@@ -83,82 +73,6 @@ def get_weather():
         print("天気API取得エラー:", e)
         
     return jsonify({"icon": "☀️", "temp": "--°C"})
-
-@app.route('/api/fetch-live-flight', methods=['POST'])
-def fetch_live_flight():
-    global flight_data
-    req_data = request.get_json() or {}
-    airport_code = req_data.get('airport_code', 'HND').upper()
-    target_gate = str(req_data.get('gate_number', '5')).strip()
-
-    try:
-        url = f"https://api.flightradar24.com/common/v1/airport.json?code={airport_code}&plugin[]=&plugin-setting[schedule][mode]=departures&plugin-setting[schedule][timestamp]={int(datetime.now().timestamp())}&page=1&limit=100"
-        
-        # cloudscraper経由でリクエストを実行
-        resp = scraper.get(url, timeout=10)
-        
-        if resp.status_code != 200:
-            return jsonify({"status": "error", "message": f"FlightRadar24通信エラー (HTTP {resp.status_code})"})
-
-        data = resp.json()
-        
-        plugin_data = data.get("result", {}).get("response", {}).get("airport", {}).get("pluginData", {})
-        schedule = plugin_data.get("schedule", {})
-        departures = schedule.get("departures", {}).get("data", [])
-
-        if not departures:
-            return jsonify({"status": "error", "message": f"空港コード ({airport_code}) のデータ構造が取得できませんでした。"})
-
-        matched_flight = None
-        available_gates = []
-
-        for item in departures:
-            flight = item.get("flight", {})
-            gate = flight.get("status", {}).get("generic", {}).get("gate", {})
-            gate_number = ""
-            if isinstance(gate, dict):
-                gate_number = str(gate.get("number", "")).strip()
-            elif isinstance(gate, str):
-                gate_number = gate.strip()
-
-            if gate_number:
-                available_gates.append(gate_number)
-
-            if gate_number == target_gate:
-                matched_flight = flight
-                break
-
-        if matched_flight:
-            airline_code = matched_flight.get("airline", {}).get("code", {}).get("icao", "ANA")
-            flight_no = matched_flight.get("identification", {}).get("number", {}).get("default", "ANA000")
-            dest_name = matched_flight.get("airport", {}).get("destination", {}).get("name", "OSAKA")
-            
-            std_timestamp = matched_flight.get("time", {}).get("scheduled", {}).get("departure")
-            dep_time = datetime.fromtimestamp(std_timestamp).strftime("%H:%M") if std_timestamp else "00:00"
-
-            flight_data.update({
-                "gate": target_gate,
-                "title_ja": "ご搭乗中",
-                "title_en": "NOW BOARDING",
-                "destination_ja": dest_name.split()[0],
-                "destination_en": dest_name.upper(),
-                "airline_code": airline_code,
-                "flight_no": flight_no,
-                "departure_time": dep_time,
-                "boarding_time": dep_time,
-                "weather_date": datetime.now().strftime("%m月%d日")
-            })
-            return jsonify({"status": "success", "data": flight_data})
-        else:
-            gates_str = ", ".join(sorted(list(set(available_gates)))) if available_gates else "現在ゲート番号が設定されている便がありません"
-            return jsonify({
-                "status": "error", 
-                "message": f"ゲート {target_gate} の便が見つかりませんでした。\n取得できたゲート一覧: [{gates_str}]"
-            })
-
-    except Exception as e:
-        print("FlightRadar24取得エラー:", e)
-        return jsonify({"status": "error", "message": f"API取得例外: {str(e)}"})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
