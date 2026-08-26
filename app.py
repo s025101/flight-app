@@ -1,15 +1,11 @@
 from flask import Flask, render_template, jsonify, request
 import requests
 from datetime import datetime
-# 正しいインポート文に修正
 from FlightRadarAPI import FlightRadar24API
 
 app = Flask(__name__)
-
-# FlightRadar24 APIの初期化
 fr_api = FlightRadar24API()
 
-# 空港ごとの緯度・経度マッピング（天気取得用）
 AIRPORT_COORDS = {
     "羽田": {"lat": 35.5494, "lon": 139.7798},
     "成田": {"lat": 35.7647, "lon": 140.3863},
@@ -84,20 +80,36 @@ def get_weather():
 def fetch_live_flight():
     global flight_data
     req_data = request.get_json() or {}
-    airport_code = req_data.get('airport_code', 'HND')
+    airport_code = req_data.get('airport_code', 'HND').upper()
     target_gate = str(req_data.get('gate_number', '5')).strip()
 
     try:
+        # 空港詳細を取得
         details = fr_api.get_airport_details(airport_code)
-        plugin_data = details.get("pluginData", {}).get("schedule", {})
-        departures = plugin_data.get("departures", {}).get("data", [])
+        
+        # データの安全な抽出
+        plugin_data = details.get("pluginData", {}) if isinstance(details, dict) else {}
+        schedule = plugin_data.get("schedule", {})
+        departures = schedule.get("departures", {}).get("data", [])
+
+        if not departures:
+            return jsonify({
+                "status": "error", 
+                "message": f"空港コード ({airport_code}) の出発便データが取得できませんでした（データ件数0）。"
+            })
 
         matched_flight = None
+        available_gates = []
+
         for item in departures:
             flight = item.get("flight", {})
+            # ゲート情報の安全な取得
             gate = flight.get("status", {}).get("generic", {}).get("gate", {})
-            gate_number = str(gate.get("number", "")).strip()
+            gate_number = str(gate.get("number", "")).strip() if isinstance(gate, dict) else ""
             
+            if gate_number:
+                available_gates.append(gate_number)
+
             if gate_number == target_gate:
                 matched_flight = flight
                 break
@@ -124,11 +136,15 @@ def fetch_live_flight():
             })
             return jsonify({"status": "success", "data": flight_data})
         else:
-            return jsonify({"status": "error", "message": f"ゲート {target_gate} の出発便が見つかりませんでした"})
+            gates_str = ", ".join(set(available_gates)) if available_gates else "（現在ゲート情報が割り当てられている便がありません）"
+            return jsonify({
+                "status": "error", 
+                "message": f"ゲート {target_gate} の便が見つかりません。現在取得できたゲート一覧: [{gates_str}]"
+            })
 
     except Exception as e:
         print("FlightRadar24取得エラー:", e)
-        return jsonify({"status": "error", "message": f"取得失敗: {str(e)}"})
+        return jsonify({"status": "error", "message": f"API接続エラー: {str(e)}"})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
