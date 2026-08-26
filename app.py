@@ -1,8 +1,8 @@
 from flask import Flask, render_template, jsonify, request
 import requests
 from datetime import datetime
-# モジュール名をすべて小文字の flightradar24 に修正
-from flightradar24 import FlightRadar24API
+# 正しいインポート文に修正
+from FlightRadarAPI import FlightRadar24API
 
 app = Flask(__name__)
 
