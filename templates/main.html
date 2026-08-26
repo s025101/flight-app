@@ -13,7 +13,6 @@
       display: flex;
       height: 100vh;
       overflow: hidden;
-      position: relative;
     }
 
     /* --- 左側：管理パネル --- */
@@ -24,29 +23,7 @@
       padding: 20px;
       overflow-y: auto;
       border-right: 2px solid #333;
-      transition: all 0.3s ease;
     }
-    .admin-panel.collapsed {
-      display: none;
-    }
-
-    .toggle-panel-btn {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      z-index: 100;
-      background-color: rgba(51, 51, 51, 0.8);
-      color: #fff;
-      border: 1px solid #666;
-      padding: 6px 12px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 0.85rem;
-      font-weight: bold;
-      backdrop-filter: blur(4px);
-    }
-    .toggle-panel-btn:hover { background-color: #555; }
-
     .admin-panel h3 {
       margin-top: 0;
       color: #0052cc;
@@ -72,8 +49,9 @@
     .row { display: flex; gap: 8px; }
     .row .form-group { flex: 1; }
     
-    button.btn-primary, button.btn-live {
+    button.btn-primary {
       width: 100%;
+      background-color: #0052cc;
       color: white;
       border: none;
       padding: 12px;
@@ -83,9 +61,20 @@
       cursor: pointer;
       margin-top: 10px;
     }
-    button.btn-primary { background-color: #0052cc; }
     button.btn-primary:hover { background-color: #003d99; }
-    button.btn-live { background-color: #10b981; margin-top: 6px; }
+
+    button.btn-live {
+      width: 100%;
+      background-color: #10b981;
+      color: white;
+      border: none;
+      padding: 12px;
+      font-size: 1rem;
+      font-weight: bold;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 6px;
+    }
     button.btn-live:hover { background-color: #059669; }
 
     button.btn-mode {
@@ -150,6 +139,7 @@
       position: relative;
     }
 
+    /* 準備中モード画面 */
     .standby-screen {
       position: absolute;
       top: 0;
@@ -182,6 +172,7 @@
       object-fit: contain;
     }
 
+    /* ヘッダー領域 */
     .row-header {
       height: 22%;
       display: flex;
@@ -219,6 +210,7 @@
     }
     .clock-time { font-size: 3.6rem; font-weight: bold; font-family: monospace; }
 
+    /* メイン領域 */
     .row-main {
       flex-grow: 1;
       display: flex;
@@ -266,6 +258,7 @@
     .weather-temp { font-size: 2.6rem; font-weight: bold; }
     .weather-date { font-size: 1.1rem; color: #aaaaaa; margin-top: 3px; font-weight: bold; }
 
+    /* 下部時間表記 */
     .row-time {
       height: 26%;
       background-color: #1a1a2a;
@@ -283,6 +276,7 @@
       50% { opacity: 0.2; }
       100% { opacity: 1; }
     }
+
     .blink .title-text-ja,
     .blink .title-text-en {
       animation: blinkAnimation 1.2s infinite;
@@ -292,15 +286,15 @@
 </head>
 <body>
 
-  <button type="button" class="toggle-panel-btn" onclick="toggleAdminPanel()">☰ パネル表示/非表示</button>
-
-  <div class="admin-panel" id="adminPanel">
+  <!-- 左側: コントロールパネル -->
+  <div class="admin-panel">
     <h3>コントロールパネル</h3>
     
     <button type="button" class="btn-mode" id="btnToggleMode" onclick="toggleStandbyMode()">
       📺 準備中画面（ロゴ表示）に切り替え
     </button>
 
+    <!-- リアルタイムデータ取得セクション -->
     <div class="section-title">📡 リアルタイム自動取得 (FR24)</div>
     <div class="row">
       <div class="form-group">
@@ -325,8 +319,10 @@
 
     <hr style="border:0; border-top:1px solid #ccc; margin:15px 0;">
 
+    <!-- 手動入力セクション -->
     <div class="section-title">✏️ 手動設定・調整</div>
     <form id="adminForm">
+      
       <div class="form-group">
         <label>ゲート番号</label>
         <input type="text" id="gate" value="5">
@@ -414,8 +410,11 @@
     </form>
   </div>
 
+  <!-- 右側: 案内板表示部 -->
   <div class="display-panel">
     <div class="fids-board">
+      
+      <!-- 準備中画面 -->
       <div class="standby-screen hidden" id="standbyScreen">
         <div class="standby-logo-box">
           <img src="" id="disp_standby_logo" alt="AIRLINE LOGO" onerror="handleImageError(this)">
@@ -457,7 +456,9 @@
 
       <div class="row-time">
         <div class="time-group">
-          <div class="time-label"><span>定刻</span> / <span>Scheduled</span></div>
+          <div class="time-label">
+            <span>定刻</span> / <span>Scheduled</span>
+          </div>
           <div class="time-value" id="disp_departure_time">00:00</div>
         </div>
         <div class="time-group">
@@ -465,6 +466,7 @@
           <div class="time-value" id="disp_boarding_time">00:00</div>
         </div>
       </div>
+
     </div>
   </div>
 
@@ -478,15 +480,10 @@
     let isStandby = false;
     let currentAirlineCode = "ANA";
 
-    function toggleAdminPanel() {
-      const panel = document.getElementById('adminPanel');
-      panel.classList.toggle('collapsed');
-    }
-
     function setLogoImage(imgElement, airlineCode) {
       currentAirlineCode = airlineCode;
       imgElement.setAttribute('data-ext-index', '0');
-      imgElement.src = `/logos/${airlineCode}.${EXTENSIONS[0]}`;
+      imgElement.src = `/static/logos/${airlineCode}.${EXTENSIONS[0]}`;
     }
 
     function handleImageError(imgElement) {
@@ -494,7 +491,7 @@
       if (extIndex < EXTENSIONS.length - 1) {
         extIndex++;
         imgElement.setAttribute('data-ext-index', extIndex);
-        imgElement.src = `/logos/${currentAirlineCode}.${EXTENSIONS[extIndex]}`;
+        imgElement.src = `/static/logos/${currentAirlineCode}.${EXTENSIONS[extIndex]}`;
       } else {
         const iata = IATA_MAP[currentAirlineCode] || currentAirlineCode;
         const fallbackUrl = `https://images.kiwi.com/airlines/128x128/${iata}.png`;
@@ -520,18 +517,20 @@
       }
     }
 
+    // --- Flask API と通信する関数群 ---
+
     async function autoFetchWeather() {
       const destVal = document.getElementById('destination').value;
       const destJa = destVal.split('|')[0];
       try {
-        const response = await fetch(`/api/weather?dest=${encodeURIComponent(destJa)}`);
-        const weatherData = await response.json();
+        const res = await fetch(`/api/weather?destination=${encodeURIComponent(destJa)}`);
+        const weatherData = await res.json();
         if (weatherData) {
-          document.getElementById('weather_icon').value = weatherData.icon;
-          document.getElementById('weather_temp').value = weatherData.temp;
+          document.getElementById('weather_icon').value = weatherData.icon || '☀️';
+          document.getElementById('weather_temp').value = weatherData.temp || '--°C';
         }
       } catch (e) {
-        console.error(e);
+        console.error('天気取得エラー:', e);
       }
     }
 
@@ -540,15 +539,20 @@
       const gate = document.getElementById('live_gate').value;
       
       try {
-        const response = await fetch(`/api/live-flight?airport=${airport}&gate=${gate}`);
-        const res = await response.json();
-        if (res.status === "success") {
+        const res = await fetch('/api/fetch-live-flight', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ airport_code: airport, gate_number: gate })
+        });
+        const result = await res.json();
+        if (result.status === "success") {
+          renderData(result.data);
           alert("リアルタイムデータを反映しました！");
-          fetchFlightData(); // データを再取得して画面反映
         } else {
-          alert(res.message || "便情報が見つかりませんでした");
+          alert(result.message || "便情報が見つかりませんでした");
         }
       } catch (e) {
+        console.error('ライブデータ取得エラー:', e);
         alert("通信エラーが発生しました");
       }
     }
@@ -583,16 +587,6 @@
       setLogoImage(document.getElementById('disp_standby_logo'), airlineCode);
     }
 
-    async function fetchFlightData() {
-      try {
-        const response = await fetch('/api/flight-data');
-        const data = await response.json();
-        renderData(data);
-      } catch (e) {
-        console.error(e);
-      }
-    }
-
     async function sendUpdate() {
       const airlineCode = document.getElementById('airline_code').value;
       const flightNum = document.getElementById('flight_num').value;
@@ -616,22 +610,27 @@
       };
 
       try {
-        await fetch('/api/update-flight-data', {
+        const res = await fetch('/api/update-flight-data', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(updatedData)
         });
-        alert("手動設定を反映しました！");
+        const result = await res.json();
+        renderData(result);
       } catch (e) {
-        alert("更新に失敗しました");
+        console.error('更新エラー:', e);
       }
     }
 
+    // 初期化処理
     window.onload = async function() {
-      await fetchFlightData();
-
-      // 定期的にデータを同期したい場合はここでポーリングも可能
-      setInterval(fetchFlightData, 5000);
+      try {
+        const res = await fetch('/api/flight-data');
+        const data = await res.json();
+        renderData(data);
+      } catch (e) {
+        console.error('初期データ取得エラー:', e);
+      }
 
       setInterval(() => {
         const now = new Date();
