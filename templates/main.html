@@ -27,7 +27,6 @@
       transition: margin-left 0.3s ease;
       flex-shrink: 0;
     }
-    /* 非表示時のスタイル */
     .admin-panel.collapsed {
       margin-left: -360px;
     }
@@ -49,12 +48,10 @@
       box-shadow: 0 2px 8px rgba(0,0,0,0.4);
       transition: background-color 0.2s;
     }
-    .toggle-panel-btn:hover {
-      background-color: #003d99;
-    }
+    .toggle-panel-btn:hover { background-color: #003d99; }
 
     .admin-panel h3 {
-      margin-top: 30px; /* ボタンと被らないよう上部余白を設定 */
+      margin-top: 30px;
       color: #0052cc;
       border-bottom: 2px solid #0052cc;
       padding-bottom: 5px;
@@ -377,14 +374,104 @@
       <div class="form-group">
         <label>行き先（全国の空港）</label>
         <select id="destination" onchange="autoFetchWeather()">
-          <optgroup label="主要都市">
+          <optgroup label="北海道">
+            <option value="新千歳|NEW CHITOSE">新千歳 (CTS)</option>
+            <option value="函館|HAKODATE">函館 (HKD)</option>
+            <option value="旭川|ASAHIKAWA">旭川 (AKJ)</option>
+            <option value="釧路|KUSHIRO">釧路 (KUH)</option>
+            <option value="帯広|OBIHIRO">帯広 (OBO)</option>
+            <option value="女満別|MEMANBETSU">女満別 (MMB)</option>
+            <option value="稚内|WAKKANAI">稚内 (WKJ)</option>
+            <option value="中標津|NAKASHIBETSU">中標津 (SHB)</option>
+            <option value="紋別|MONBETSU">紋別 (MBE)</option>
+            <option value="奥尻|OKUSHIRI">奥尻 (OIR)</option>
+            <option value="利尻|RISHIRI">利尻 (RIS)</option>
+            <option value="札幌丘珠|SAPPORO OKADAMA">札幌丘珠 (OKD)</option>
+          </optgroup>
+          <optgroup label="東北">
+            <option value="青森|AOMORI">青森 (AOJ)</option>
+            <option value="三沢|MISAWA">三沢 (MSJ)</option>
+            <option value="花巻|HANAMAKI">花巻 (HNA)</option>
+            <option value="仙台|SENDAI">仙台 (SDJ)</option>
+            <option value="秋田|AKITA">秋田 (AXT)</option>
+            <option value="大館能代|ODATE NOSHIRO">大館能代 (ONJ)</option>
+            <option value="山形|YAMAGATA">山形 (GAJ)</option>
+            <option value="庄内|SHONAI">庄内 (SYO)</option>
+            <option value="福島|FUKUSHIMA">福島 (FKS)</option>
+          </optgroup>
+          <optgroup label="関東・甲信越">
             <option value="羽田|TOKYO/HANEDA">東京/羽田 (HND)</option>
             <option value="成田|TOKYO/NARITA">東京/成田 (NRT)</option>
+            <option value="茨城|IBARAKI">茨城 (IBR)</option>
+            <option value="大島|OSHIMA">大島 (OIM)</option>
+            <option value="八丈島|HACHIJOJIMA">八丈島 (HAC)</option>
+            <option value="三宅島|MIYAKEJIMA">三宅島 (MYE)</option>
+            <option value="調布|CHOFU">調布</option>
+            <option value="新潟|NIIGATA">新潟 (KIJ)</option>
+            <option value="松本|MATSUMOTO">松本 (MMJ)</option>
+          </optgroup>
+          <optgroup label="中部・北陸">
+            <option value="中部|NAGOYA/CENTRAIR">中部 (NGO)</option>
+            <option value="小牧|NAGOYA/KOMAKI">小牧 (NKM)</option>
+            <option value="富士山静岡|SHIZUOKA">富士山静岡 (FSZ)</option>
+            <option value="富山|TOYAMA">富山 (TOY)</option>
+            <option value="小松|KOMATSU">小松 (KMQ)</option>
+            <option value="能登|NOTO">能登 (NTQ)</option>
+            <option value="福井|FUKUI">福井 (FKJ)</option>
+          </optgroup>
+          <optgroup label="近畿">
             <option value="伊丹|OSAKA/ITAMI" selected>大阪/伊丹 (ITM)</option>
             <option value="関西|OSAKA/KANSAI">大阪/関西 (KIX)</option>
+            <option value="神戸|KOBE">神戸 (UKB)</option>
+            <option value="南紀白浜|SHIRAHAMA">南紀白浜 (SHM)</option>
+            <option value="但馬|TAJIMA">但馬 (TJH)</option>
+          </optgroup>
+          <optgroup label="中国・四国">
+            <option value="鳥取|TOTTORI">鳥取 (TTJ)</option>
+            <option value="米子|YONAGO">米子 (YGJ)</option>
+            <option value="出雲|IZUMO">出雲 (IZO)</option>
+            <option value="石見|IWAMI">石見 (IWJ)</option>
+            <option value="隠岐|OKI">隠岐 (OKI)</option>
+            <option value="岡山|OKAYAMA">岡山 (OKJ)</option>
+            <option value="広島|HIROSHIMA">広島 (HIJ)</option>
+            <option value="岩国|IWAKUNI">岩国 (IWK)</option>
+            <option value="山口宇部|YAMAGUCHI UBE">山口宇部 (UBJ)</option>
+            <option value="徳島|TOKUSHIMA">徳島 (TKS)</option>
+            <option value="高松|TAKAMATSU">高松 (TAK)</option>
+            <option value="松山|MATSUYAMA">松山 (MYJ)</option>
+            <option value="高知|KOCHI">高知 (KCZ)</option>
+          </optgroup>
+          <optgroup label="九州・沖縄">
             <option value="福岡|FUKUOKA">福岡 (FUK)</option>
-            <option value="新千歳|NEW CHITOSE">新千歳 (CTS)</option>
+            <option value="北九州|KITAKYUSHU">北九州 (KKJ)</option>
+            <option value="佐賀|SAGA">佐賀 (HSG)</option>
+            <option value="長崎|NAGASAKI">長崎 (NGS)</option>
+            <option value="壱岐|IKI">壱岐 (IKI)</option>
+            <option value="対馬|TSUSHIMA">対馬 (TSJ)</option>
+            <option value="五島福江|GOTO FUKUE">五島福江 (FUJ)</option>
+            <option value="熊本|KUMAMOTO">熊本 (KMJ)</option>
+            <option value="天草|AMAKUSA">天草 (AXJ)</option>
+            <option value="大分|OITA">大分 (OIT)</option>
+            <option value="宮崎|MIYAZAKI">宮崎 (KMI)</option>
+            <option value="鹿児島|KAGOSHIMA">鹿児島 (KOJ)</option>
+            <option value="奄美|AMAMI">奄美 (ASJ)</option>
+            <option value="屋久島|YAKUSHIMA">屋久島 (KUM)</option>
+            <option value="種子島|TANEGASHIMA">種子島 (TNE)</option>
+            <option value="喜界|KIKAI">喜界 (KKX)</option>
+            <option value="徳之島|TOKUNOSHIMA">徳之島 (TKN)</option>
+            <option value="沖永良部|OKINOERABU">沖永良部 (OKE)</option>
+            <option value="与論|YORON">与論 (RNJ)</option>
             <option value="那覇|OKINAWA/NAHA">沖縄/那覇 (OKA)</option>
+            <option value="宮古|MIYAKO">宮古 (MMY)</option>
+            <option value="下地島|SHIMOJIJIMA">下地島 (SHI)</option>
+            <option value="新石垣|IS HIGAKI">新石垣 (ISG)</option>
+            <option value="久米島|KUMEJIMA">久米島 (UEO)</option>
+            <option value="与那国|YONAGUNI">与那国 (OGN)</option>
+            <option value="多良間|TARAMA">多良間 (TRA)</option>
+            <option value="南大東|MINAMIDAITO">南大東 (MMD)</option>
+            <option value="北大東|KITADAITO">北大東 (KTD)</option>
+            <option value="慶良間|KERAMA">慶良間 (KJP)</option>
+            <option value="粟国|AGUNI">粟国 (AGJ)</option>
           </optgroup>
         </select>
         <button type="button" class="btn-secondary" onclick="autoFetchWeather()">🌤️ 到着地のリアルタイム天気を取得</button>
@@ -394,14 +481,34 @@
         <div class="form-group">
           <label>航空会社</label>
           <select id="airline_code">
-            <option value="ANA" selected>全日本空輸 (ANA)</option>
-            <option value="JAL">日本航空 (JAL)</option>
-            <option value="SKY">スカイマーク (SKY)</option>
-            <option value="SFJ">スターフライヤー (SFJ)</option>
-            <option value="ADO">AIRDO (ADO)</option>
-            <option value="SNJ">ソラシドエア (SNJ)</option>
-            <option value="APJ">Peach (APJ)</option>
-            <option value="FDA">FDA (FDA)</option>
+            <optgroup label="大手">
+              <option value="ANA" selected>全日本空輸 (ANA)</option>
+              <option value="JAL">日本航空 (JAL)</option>
+            </optgroup>
+            <optgroup label="主要・地域連携">
+              <option value="SKY">スカイマーク (SKY)</option>
+              <option value="SFJ">スターフライヤー (SFJ)</option>
+              <option value="ADO">AIRDO (ADO)</option>
+              <option value="SNJ">ソラシドエア (SNJ)</option>
+              <option value="FDA">FDA (FDA)</option>
+              <option value="IBX">アイベックス (IBX)</option>
+            </optgroup>
+            <optgroup label="LCC">
+              <option value="APJ">Peach (APJ)</option>
+              <option value="JJP">ジェットスター (JJP)</option>
+              <option value="SJO">スプリング・ジャパン (SJO)</option>
+              <option value="TZP">ZIPAIR (TZP)</option>
+              <option value="AJX">AirJapan (AJX)</option>
+            </optgroup>
+            <optgroup label="地域航空">
+              <option value="JTA">日本トランスオーシャン (JTA)</option>
+              <option value="RAC">琉球エアーコミューター (RAC)</option>
+              <option value="JAC">日本エアコミューター (JAC)</option>
+              <option value="HAC">北海道エアシステム (HAC)</option>
+              <option value="ORC">オリエンタルエアブリッジ (ORC)</option>
+              <option value="AMX">天草エアライン (AMX)</option>
+              <option value="TOK">トキエア (TOK)</option>
+            </optgroup>
           </select>
         </div>
         <div class="form-group">
@@ -506,13 +613,14 @@
   <script>
     const IATA_MAP = {
       "ANA": "NH", "JAL": "JL", "SKY": "BC", "SFJ": "7G", "ADO": "HD",
-      "SNJ": "6J", "APJ": "MM", "JJP": "GK", "FDA": "JH", "IBX": "FW"
+      "SNJ": "6J", "APJ": "MM", "JJP": "GK", "SJO": "IJ", "TZP": "ZG",
+      "AJX": "NQ", "FDA": "JH", "IBX": "FW", "JTA": "NU", "RAC": "RAC",
+      "JAC": "JC", "HAC": "HC", "ORC": "OC", "AMX": "AH", "TOK": "BV"
     };
 
     let isStandby = false;
     let isPanelOpen = true;
 
-    // パネル開閉トグル関数
     function toggleAdminPanel() {
       isPanelOpen = !isPanelOpen;
       const panel = document.getElementById('adminPanel');
@@ -527,13 +635,11 @@
       }
     }
 
-    // 最初に /web/logos/航空会社コード.png を読み込みに行く設定
     function setLogoImage(imgElement, airlineCode) {
       imgElement.setAttribute('data-airline-code', airlineCode);
       imgElement.src = `/web/logos/${airlineCode}.png`;
     }
 
-    // 画像読み込み失敗時（404等）、速やかに kiwi.com の画像へ切替
     function handleImageError(imgElement) {
       const airlineCode = imgElement.getAttribute('data-airline-code') || "ANA";
       const iata = IATA_MAP[airlineCode] || airlineCode;
