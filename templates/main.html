@@ -533,7 +533,7 @@
     function setLogoImage(imgElement, airlineCode) {
       currentAirlineCode = airlineCode;
       imgElement.setAttribute('data-ext-index', '0');
-      imgElement.src = `/static/logos/${airlineCode}.${EXTENSIONS[0]}`;
+      imgElement.src = `/web/logos/${airlineCode}.${EXTENSIONS[0]}`;
     }
 
     function handleImageError(imgElement) {
