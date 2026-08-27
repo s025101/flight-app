@@ -509,7 +509,6 @@
       "SNJ": "6J", "APJ": "MM", "JJP": "GK", "FDA": "JH", "IBX": "FW"
     };
 
-    const EXTENSIONS = ['png', 'jpg', 'jpeg', 'svg', 'webp'];
     let isStandby = false;
     let isPanelOpen = true;
 
@@ -528,26 +527,20 @@
       }
     }
 
+    // 最初に /web/logos/航空会社コード.png を読み込みに行く設定
     function setLogoImage(imgElement, airlineCode) {
       imgElement.setAttribute('data-airline-code', airlineCode);
-      imgElement.setAttribute('data-ext-index', '0');
-      imgElement.src = `/web/logos/${airlineCode}.${EXTENSIONS[0]}`;
+      imgElement.src = `/web/logos/${airlineCode}.png`;
     }
 
+    // 画像読み込み失敗時（404等）、速やかに kiwi.com の画像へ切替
     function handleImageError(imgElement) {
       const airlineCode = imgElement.getAttribute('data-airline-code') || "ANA";
-      let extIndex = parseInt(imgElement.getAttribute('data-ext-index') || '0');
+      const iata = IATA_MAP[airlineCode] || airlineCode;
+      const fallbackUrl = `https://images.kiwi.com/airlines/128x128/${iata}.png`;
       
-      if (extIndex < EXTENSIONS.length - 1) {
-        extIndex++;
-        imgElement.setAttribute('data-ext-index', extIndex);
-        imgElement.src = `/web/logos/${airlineCode}.${EXTENSIONS[extIndex]}`;
-      } else {
-        const iata = IATA_MAP[airlineCode] || airlineCode;
-        const fallbackUrl = `https://images.kiwi.com/airlines/128x128/${iata}.png`;
-        if (imgElement.src !== fallbackUrl) {
-          imgElement.src = fallbackUrl;
-        }
+      if (imgElement.src !== fallbackUrl) {
+        imgElement.src = fallbackUrl;
       }
     }
 
