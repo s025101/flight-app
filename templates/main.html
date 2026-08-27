@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>空港案内板システム</title>
+  <title>Gate Information Display System</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -13,6 +13,7 @@
       display: flex;
       height: 100vh;
       overflow: hidden;
+      position: relative;
     }
 
     /* --- 左側：管理パネル --- */
@@ -23,9 +24,37 @@
       padding: 20px;
       overflow-y: auto;
       border-right: 2px solid #333;
+      transition: margin-left 0.3s ease;
+      flex-shrink: 0;
     }
+    /* 非表示時のスタイル */
+    .admin-panel.collapsed {
+      margin-left: -360px;
+    }
+
+    /* パネル開閉トグルボタン */
+    .toggle-panel-btn {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      z-index: 100;
+      background-color: #0052cc;
+      color: white;
+      border: none;
+      padding: 8px 14px;
+      font-size: 0.9rem;
+      font-weight: bold;
+      border-radius: 4px;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+      transition: background-color 0.2s;
+    }
+    .toggle-panel-btn:hover {
+      background-color: #003d99;
+    }
+
     .admin-panel h3 {
-      margin-top: 0;
+      margin-top: 30px; /* ボタンと被らないよう上部余白を設定 */
       color: #0052cc;
       border-bottom: 2px solid #0052cc;
       padding-bottom: 5px;
@@ -286,8 +315,13 @@
 </head>
 <body>
 
+  <!-- パネル開閉ボタン -->
+  <button type="button" class="toggle-panel-btn" id="btnTogglePanel" onclick="toggleAdminPanel()">
+    ◀ パネルを閉じる
+  </button>
+
   <!-- 左側: コントロールパネル -->
-  <div class="admin-panel">
+  <div class="admin-panel" id="adminPanel">
     <h3>コントロールパネル</h3>
     
     <button type="button" class="btn-mode" id="btnToggleMode" onclick="toggleStandbyMode()">
@@ -478,7 +512,23 @@
 
     const EXTENSIONS = ['png', 'jpg', 'jpeg', 'svg', 'webp'];
     let isStandby = false;
+    let isPanelOpen = true;
     let currentAirlineCode = "ANA";
+
+    // パネル開閉トグル関数
+    function toggleAdminPanel() {
+      isPanelOpen = !isPanelOpen;
+      const panel = document.getElementById('adminPanel');
+      const btn = document.getElementById('btnTogglePanel');
+
+      if (isPanelOpen) {
+        panel.classList.remove('collapsed');
+        btn.innerText = "◀ パネルを閉じる";
+      } else {
+        panel.classList.add('collapsed');
+        btn.innerText = "▶ パネルを開く";
+      }
+    }
 
     function setLogoImage(imgElement, airlineCode) {
       currentAirlineCode = airlineCode;
@@ -516,8 +566,6 @@
         btn.style.backgroundColor = "#d97706";
       }
     }
-
-    // --- Flask API と通信する関数群 ---
 
     async function autoFetchWeather() {
       const destVal = document.getElementById('destination').value;
@@ -622,7 +670,6 @@
       }
     }
 
-    // 初期化処理
     window.onload = async function() {
       try {
         const res = await fetch('/api/flight-data');
