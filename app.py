@@ -2,7 +2,7 @@ from flask import Flask, render_template, jsonify, request
 import requests
 from datetime import datetime
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='web', static_url_path='/web')
 
 # 空港ごとの緯度・経度マッピング（天気取得用）
 AIRPORT_COORDS = {
