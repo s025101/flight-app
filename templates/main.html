@@ -309,7 +309,6 @@
     .blink .title-text-ja,
     .blink .title-text-en {
       animation: blinkAnimation 1.2s infinite;
-      color: #ffcc00 !important;
     }
   </style>
 </head>
@@ -513,7 +512,6 @@
     const EXTENSIONS = ['png', 'jpg', 'jpeg', 'svg', 'webp'];
     let isStandby = false;
     let isPanelOpen = true;
-    let currentAirlineCode = "ANA";
 
     // パネル開閉トグル関数
     function toggleAdminPanel() {
@@ -531,19 +529,21 @@
     }
 
     function setLogoImage(imgElement, airlineCode) {
-      currentAirlineCode = airlineCode;
+      imgElement.setAttribute('data-airline-code', airlineCode);
       imgElement.setAttribute('data-ext-index', '0');
       imgElement.src = `/web/logos/${airlineCode}.${EXTENSIONS[0]}`;
     }
 
     function handleImageError(imgElement) {
+      const airlineCode = imgElement.getAttribute('data-airline-code') || "ANA";
       let extIndex = parseInt(imgElement.getAttribute('data-ext-index') || '0');
+      
       if (extIndex < EXTENSIONS.length - 1) {
         extIndex++;
         imgElement.setAttribute('data-ext-index', extIndex);
-        imgElement.src = `/static/logos/${currentAirlineCode}.${EXTENSIONS[extIndex]}`;
+        imgElement.src = `/web/logos/${airlineCode}.${EXTENSIONS[extIndex]}`;
       } else {
-        const iata = IATA_MAP[currentAirlineCode] || currentAirlineCode;
+        const iata = IATA_MAP[airlineCode] || airlineCode;
         const fallbackUrl = `https://images.kiwi.com/airlines/128x128/${iata}.png`;
         if (imgElement.src !== fallbackUrl) {
           imgElement.src = fallbackUrl;
@@ -670,7 +670,17 @@
       }
     }
 
+    function updateClock() {
+      const now = new Date();
+      const h = String(now.getHours()).padStart(2, '0');
+      const m = String(now.getMinutes()).padStart(2, '0');
+      document.getElementById('disp_clock').innerText = `${h}:${m}`;
+    }
+
     window.onload = async function() {
+      updateClock();
+      setInterval(updateClock, 1000);
+
       try {
         const res = await fetch('/api/flight-data');
         const data = await res.json();
@@ -678,13 +688,6 @@
       } catch (e) {
         console.error('初期データ取得エラー:', e);
       }
-
-      setInterval(() => {
-        const now = new Date();
-        const h = String(now.getHours()).padStart(2, '0');
-        const m = String(now.getMinutes()).padStart(2, '0');
-        document.getElementById('disp_clock').innerText = `${h}:${m}`;
-      }, 1000);
     }
   </script>
 </body>
