@@ -1,4 +1,5 @@
 requests
+brotli
 Flask==3.0.2
 gunicorn==21.2.0
 FlightRadarAPI==1.3.2
