@@ -103,4 +103,27 @@ def fetch_live_flight():
             matched_flight = departures[0].get("flight", {})
 
         if matched_flight:
-            # 1. 航空会社 &
+            # 1. 航空会社 & 便名
+            airline_code = matched_flight.get("airline", {}).get("code", {}).get("iata") or "ANA"
+            flight_number = matched_flight.get("identification", {}).get("number", {}).get("default") or f"{airline_code}100"
+            
+            # 2. 到着地
+            dest_iata = matched_flight.get("destination", {}).get("code", {}).get("iata") or "ITM"
+            dest_name_en = matched_flight.get("destination", {}).get("name") or "OSAKA"
+            dest_name_ja = AIRPORT_NAME_MAP.get(dest_iata, dest_name_en)
+
+            # 3. 出発時刻（STD）
+            std_timestamp = matched_flight.get("time", {}).get("scheduled", {}).get("departure")
+            dep_time = "07:10"
+            if std_timestamp:
+                dep_time = datetime.fromtimestamp(std_timestamp).strftime("%H:%M")
+
+            # 4. ステータス判定
+            status_text = matched_flight.get("status", {}).get("text") or "Scheduled"
+            title_ja = "搭乗ご案内"
+            title_en = "BOARDING INFORMATION"
+
+            if "Boarding" in status_text:
+                title_ja = "ご搭乗中"
+                title_en = "NOW BOARDING"
+            elif "Delayed" in status_text:
