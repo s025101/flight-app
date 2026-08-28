@@ -10,8 +10,11 @@
 
     <!-- コントロールパネル -->
     <div id="control-panel">
+        <button id="toggle-panel-btn">パネルを閉じる</button>
         <h2>コントロールパネル</h2>
         
+        <button id="btn-standby" class="btn-warning">準備中画面（ロゴ表示）に切り替え</button>
+
         <div class="section">
             <h3>リアルタイム自動取得 (FR24)</h3>
             <div class="form-group">
@@ -42,7 +45,7 @@
                 <label>対象ゲート</label>
                 <input type="text" id="input-live-gate" value="5">
             </div>
-            <button id="btn-fetch-live" class="btn-primary">⚡ リアルタイム情報を反映</button>
+            <button id="btn-fetch-live" class="btn-primary">リアルタイム情報を反映</button>
         </div>
 
         <div class="section">
@@ -84,6 +87,8 @@
                     <option value="松山|MATSUYAMA">松山 (MYJ)</option>
                 </select>
             </div>
+            <button id="btn-fetch-weather" class="btn-info">到着地のリアルタイム天気を取得</button>
+
             <div class="form-group">
                 <label>航空会社</label>
                 <select id="manual-airline">
@@ -109,11 +114,9 @@
                 <input type="text" id="manual-board-time" value="06:50">
             </div>
             
-            <hr style="border: 0; border-top: 1px solid #30363d; margin: 15px 0;">
-
             <div class="form-group">
                 <label>天気マーク</label>
-                <input type="text" id="manual-weather-icon" value="☀️☁️">
+                <input type="text" id="manual-weather-icon" value="☀️">
             </div>
             <div class="form-group">
                 <label>気温</label>
@@ -146,8 +149,8 @@
 
         <div class="main-content">
             <div class="destination-container">
-                <span class="dest-ja" id="disp-dest-ja">大阪/伊丹</span>
-                <span class="dest-en" id="disp-dest-en">OSAKA/ITAMI</span>
+                <span class="dest-ja" id="disp-dest-ja">能登</span>
+                <span class="dest-en" id="disp-dest-en">NOTO</span>
             </div>
             
             <div class="flight-container">
@@ -156,8 +159,8 @@
             </div>
 
             <div class="weather-container">
-                <span class="weather-icon" id="disp-weather-icon">☀️☁️</span>
-                <span class="weather-temp" id="disp-weather-temp">21°C</span>
+                <span class="weather-icon" id="disp-weather-icon">☀️</span>
+                <span class="weather-temp" id="disp-weather-temp">22°C</span>
                 <span class="weather-date" id="disp-weather-date">8月25日</span>
             </div>
         </div>
@@ -175,7 +178,7 @@
     </div>
 
     <script>
-        // 時計更新機能
+        // 時計更新
         function updateClock() {
             const now = new Date();
             const h = String(now.getHours()).padStart(2, '0');
@@ -186,7 +189,7 @@
         setInterval(updateClock, 1000);
         updateClock();
 
-        // 画面（DOM）の表示データを更新する統一関数
+        // 画面のテキストを書き換える統一処理
         function updateUI(data) {
             if (!data) return;
             const setTxt = (id, val) => {
@@ -208,7 +211,7 @@
             setTxt("disp-weather-date", data.weather_date);
         }
 
-        // ⚡ リアルタイム情報反映ボタンの処理
+        // ⚡ リアルタイム情報反映ボタン
         const btnFetch = document.getElementById("btn-fetch-live");
         if (btnFetch) {
             btnFetch.addEventListener("click", async () => {
@@ -235,15 +238,13 @@
             });
         }
 
-        // 🛠 手動設定反映ボタンの処理
+        // 🛠 手動設定反映ボタン
         const btnManual = document.getElementById("btn-manual-update");
         if (btnManual) {
             btnManual.addEventListener("click", async () => {
-                // 行先セレクトの値を分割 (日本語|英語)
                 const destVal = document.getElementById("manual-dest-select")?.value || "|";
                 const [destJa, destEn] = destVal.split("|");
 
-                // タイトルセレクトの値を分割 (日本語 / 英語)
                 const titleVal = document.getElementById("manual-title-ja")?.value || " / ";
                 const [titleJa, titleEn] = titleVal.split(" / ");
 
