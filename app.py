@@ -1,47 +1,42 @@
+import os
+import datetime
 from flask import Flask, request, jsonify, render_template
-from FlightRadar24 import FlightRadar24API
-import requests
 
-app = Flask(__name__)
+# main.html がルートディレクトリにあっても読み込めるように設定
+app = Flask(__name__, template_folder='.')
+
 fr_api = FlightRadar24API()
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    # 明示的に main.html を読み込み
+    return render_template('main.html')
 
 @app.route('/api/fetch-live-flight', methods=['POST'])
 def fetch_live_flight():
     try:
         data = request.get_json() or {}
         
-        # パラメータの取得（front側からのキー表記ゆれに対応）
         airport_code = data.get('airport_code') or data.get('airport') or 'HND'
         target_gate = str(data.get('gate_number') or data.get('gate') or '').strip()
 
-        # 空港の詳細・スケジュールの取得（get_airport_details ではなく get_airport を使用）
-        # ※ライブラリ仕様により airport オブジェクトまたは辞書を取得
         try:
             airport_info = fr_api.get_airport(airport_code)
         except Exception as e:
-            # 万が一 get_airport が使えない場合のフォールバック（API直叩き等）
             return jsonify({
                 "status": "error",
                 "message": f"空港情報の取得に失敗しました: {str(e)}"
             }), 400
 
-        # 出発予定便リストの探索
-        # ※FlightRadar24APIのレスポンス構造から出発便を取り出します
         plugin_data = getattr(airport_info, 'plugin_data', {}) or {}
         schedule = plugin_data.get('schedule', {}) or {}
         departures = schedule.get('departures', {}).get('data', [])
 
         matched_flight = None
 
-        # 1. 指定されたゲート番号に一致する便を検索
         if target_gate:
             for item in departures:
                 flight = item.get('flight', {})
-                # ゲート情報の取得
                 gate = str(flight.get('status', {}).get('generic', {}).get('status', {}).get('gate') or 
                            flight.get('airport', {}).get('origin', {}).get('info', {}).get('gate') or '').strip()
                 
@@ -49,7 +44,6 @@ def fetch_live_flight():
                     matched_flight = flight
                     break
 
-        # 2. ゲート一致が見つからない場合、直近の出発便を1件取得
         if not matched_flight and departures:
             matched_flight = departures[0].get('flight', {})
 
@@ -57,27 +51,22 @@ def fetch_live_flight():
             return jsonify({
                 "status": "error",
                 "message": f"空港 {airport_code} (ゲート: {target_gate}) の対象便が見つかりませんでした。"
-            }), 444
+            }), 404
 
-        # 取得できた便データの抽出・整頓
-        airline_code = matched_flight.get('airline', {}).get('code', {}).get('ica0', 'ANA')
+        airline_code = matched_flight.get('airline', {}).get('code', {}).get('icao', 'ANA')
         flight_number = matched_flight.get('identification', {}).get('number', {}).get('default', '')
         
-        # 行き先空港の名称
         dest_name = matched_flight.get('airport', {}).get('destination', {}).get('name', '')
         dest_code = matched_flight.get('airport', {}).get('destination', {}).get('code', {}).get('iata', '')
         
-        # 時刻情報
         time_details = matched_flight.get('time', {})
         std_timestamp = time_details.get('scheduled', {}).get('departure')
         
-        import datetime
         std_str = "07:10"
         if std_timestamp:
             std_dt = datetime.datetime.fromtimestamp(std_timestamp)
             std_str = std_dt.strftime('%H:%M')
 
-        # フロントエンドが期待するフォーマットで返却
         response_data = {
             "status": "success",
             "data": {
