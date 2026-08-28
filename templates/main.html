@@ -330,14 +330,26 @@
       <div class="form-group">
         <label>出発空港</label>
         <select id="live_airport">
-          <option value="HND" selected>羽田 (HND)</option>
-          <option value="NRT">成田 (NRT)</option>
-          <option value="ITM">伊丹 (ITM)</option>
-          <option value="KIX">関西 (KIX)</option>
-          <option value="FUK">福岡 (FUK)</option>
-          <option value="CTS">新千歳 (CTS)</option>
-          <option value="NGO">中部 (NGO)</option>
-          <option value="OKA">那覇 (OKA)</option>
+          <optgroup label="主要空港">
+            <option value="HND" selected>羽田 (HND)</option>
+            <option value="NRT">成田 (NRT)</option>
+            <option value="ITM">伊丹 (ITM)</option>
+            <option value="KIX">関西 (KIX)</option>
+            <option value="FUK">福岡 (FUK)</option>
+            <option value="CTS">新千歳 (CTS)</option>
+            <option value="NGO">中部 (NGO)</option>
+            <option value="OKA">那覇 (OKA)</option>
+          </optgroup>
+          <optgroup label="地方空港">
+            <option value="HIJ">広島 (HIJ)</option>
+            <option value="SDJ">仙台 (SDJ)</option>
+            <option value="KMJ">熊本 (KMJ)</option>
+            <option value="KOJ">鹿児島 (KOJ)</option>
+            <option value="MYJ">松山 (MYJ)</option>
+            <option value="TAK">高松 (TAK)</option>
+            <option value="KIJ">新潟 (KIJ)</option>
+            <option value="KMQ">小松 (KMQ)</option>
+          </optgroup>
         </select>
       </div>
       <div class="form-group">
@@ -700,70 +712,65 @@
         }
       } catch (e) {
         console.error('ライブデータ取得エラー:', e);
-        alert("通信エラーが発生しました");
+        alert("データの取得中にエラーが発生しました。");
       }
     }
 
     function renderData(data) {
-      if (!data) return;
-      document.getElementById('disp_gate').innerText = data.gate || '';
-      
-      const titleBlock = document.getElementById('disp_title_block');
+      document.getElementById('disp_gate').innerText = data.gate || '-';
       document.getElementById('disp_title_ja').innerText = data.title_ja || '';
       document.getElementById('disp_title_en').innerText = data.title_en || '';
+      document.getElementById('disp_dest_ja').innerText = data.destination_ja || '';
+      document.getElementById('disp_dest_en').innerText = data.destination_en || '';
+      document.getElementById('disp_flight_no').innerText = data.flight_no || '';
+      document.getElementById('disp_departure_time').innerText = data.departure_time || '00:00';
+      document.getElementById('disp_boarding_time').innerText = data.boarding_time || '00:00';
+      document.getElementById('disp_weather_icon').innerText = data.weather_icon || '☀️';
+      document.getElementById('disp_weather_temp').innerText = data.weather_temp || '--°C';
+      document.getElementById('disp_weather_date').innerText = data.weather_date || '';
 
-      if (data.title_ja === "ご搭乗中" || data.title_ja === "最終案内") {
+      const logoImg = document.getElementById('disp_logo');
+      const standbyLogoImg = document.getElementById('disp_standby_logo');
+      setLogoImage(logoImg, data.airline_code || 'ANA');
+      setLogoImage(standbyLogoImg, data.airline_code || 'ANA');
+
+      const titleBlock = document.getElementById('disp_title_block');
+      if (data.title_ja && (data.title_ja.includes('遅延') || data.title_ja.includes('最終案内') || data.title_ja.includes('ご搭乗中'))) {
         titleBlock.classList.add('blink');
       } else {
         titleBlock.classList.remove('blink');
       }
-
-      document.getElementById('disp_dest_ja').innerText = data.destination_ja || '';
-      document.getElementById('disp_dest_en').innerText = data.destination_en || '';
-      
-      document.getElementById('disp_flight_no').innerText = data.flight_no || '';
-      document.getElementById('disp_departure_time').innerText = data.departure_time || '';
-      document.getElementById('disp_boarding_time').innerText = data.boarding_time || '';
-
-      document.getElementById('disp_weather_icon').innerText = data.weather_icon || '';
-      document.getElementById('disp_weather_temp').innerText = data.weather_temp || '';
-      document.getElementById('disp_weather_date').innerText = data.weather_date || '';
-
-      const airlineCode = data.airline_code || "ANA";
-      setLogoImage(document.getElementById('disp_logo'), airlineCode);
-      setLogoImage(document.getElementById('disp_standby_logo'), airlineCode);
     }
 
     async function sendUpdate() {
+      const titleVal = document.getElementById('title_select').value.split('|');
+      const destVal = document.getElementById('destination').value.split('|');
       const airlineCode = document.getElementById('airline_code').value;
       const flightNum = document.getElementById('flight_num').value;
-      
-      const [titleJa, titleEn] = document.getElementById('title_select').value.split('|');
-      const [destJa, destEn] = document.getElementById('destination').value.split('|');
 
-      let updatedData = {
+      const updated = {
         gate: document.getElementById('gate').value,
-        title_ja: titleJa,
-        title_en: titleEn,
-        destination_ja: destJa,
-        destination_en: destEn,
+        title_ja: titleVal[0],
+        title_en: titleVal[1] || '',
+        destination_ja: destVal[0],
+        destination_en: destVal[1] || '',
         airline_code: airlineCode,
         flight_no: `${airlineCode}${flightNum}`,
         departure_time: document.getElementById('departure_time').value,
         boarding_time: document.getElementById('boarding_time').value,
         weather_icon: document.getElementById('weather_icon').value,
         weather_temp: document.getElementById('weather_temp').value,
-        weather_date: document.getElementById('weather_date').value,
+        weather_date: document.getElementById('weather_date').value
       };
 
       try {
         const res = await fetch('/api/update-flight-data', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(updatedData)
+          body: JSON.stringify(updated)
         });
-        const result = await res.json();
-        renderData(result);
+        const data = await res.json();
+        renderData(data);
       } catch (e) {
         console.error('更新エラー:', e);
       }
@@ -771,15 +778,12 @@
 
     function updateClock() {
       const now = new Date();
-      const h = String(now.getHours()).padStart(2, '0');
-      const m = String(now.getMinutes()).padStart(2, '0');
-      document.getElementById('disp_clock').innerText = `${h}:${m}`;
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      document.getElementById('disp_clock').innerText = `${hours}:${minutes}`;
     }
 
-    window.onload = async function() {
-      updateClock();
-      setInterval(updateClock, 1000);
-
+    async function fetchInitialData() {
       try {
         const res = await fetch('/api/flight-data');
         const data = await res.json();
@@ -788,6 +792,12 @@
         console.error('初期データ取得エラー:', e);
       }
     }
+
+    window.onload = () => {
+      fetchInitialData();
+      updateClock();
+      setInterval(updateClock, 1000);
+    };
   </script>
 </body>
 </html>
