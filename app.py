@@ -9,7 +9,8 @@ try:
     from FlightRadar24 import FlightRadar24API
     fr_api = FlightRadar24API()
     has_fr24 = True
-except Exception:
+except Exception as e:
+    print(f"FR24 Init Error: {e}")
     fr_api = None
     has_fr24 = False
 
@@ -17,7 +18,7 @@ AIRPORT_NAME_MAP = {
     "HND": "東京/羽田", "NRT": "東京/成田", "ITM": "大阪/伊丹", "KIX": "大阪/関西",
     "FUK": "福岡", "CTS": "新千歳", "NGO": "中部", "OKA": "沖縄/那覇",
     "HIJ": "広島", "KCZ": "高知", "MMJ": "松本", "KMJ": "熊本", "KOJ": "鹿児島",
-    "SDJ": "仙台", "AOJ": "青森", "AKJ": "旭川", "HKD": "函館", "MYJ": "松山"
+    "SDJ": "仙台", "AOJ": "青森", "AKJ": "旭川", "HKD": "函館", "MYJ": "松山", "NTQ": "能登"
 }
 
 current_flight_data = {
@@ -57,21 +58,29 @@ def get_weather():
 
 @app.route("/api/fetch-live-flight", methods=["POST"])
 def fetch_live_flight():
-    """空港コードとゲート番号をキーにしてリアルタイム情報を取得（安全設計）"""
+    """リアルタイム情報取得（通信遮断・サーバーダウン回避対策済）"""
     global current_flight_data
     req_data = request.json or {}
     
     airport_code = str(req_data.get("airport_code") or req_data.get("airport") or "HND").strip().upper()
     target_gate = str(req_data.get("gate_number") or req_data.get("gate") or "5").strip().upper()
 
-    if not has_fr24 or not fr_api:
-        return jsonify({"status": "error", "message": "FlightRadar24 APIが使用できません。"}), 500
+    # APIライブラリのチェック
+    if not has_fr24 or fr_api is None:
+        return jsonify({
+            "status": "error",
+            "message": "FlightRadar24ライブラリが利用できません。"
+        }), 200  # 500を出さずに200でエラー内容を返す
 
+    # 最外殻で通信エラー（Cloudflareブロック等）を完全にキャッチする
     try:
-        # 空港詳細を取得（例外が発生しても落ちないようにケア）
         details = fr_api.get_airport_details(airport_code)
-        if not isinstance(details, dict):
-            details = {}
+        
+        if not details or not isinstance(details, dict):
+            return jsonify({
+                "status": "error",
+                "message": "FlightRadar24からの応答データが空でした。"
+            }), 200
 
         plugin_data = details.get("pluginData") or {}
         schedule = plugin_data.get("schedule") or {}
@@ -80,33 +89,26 @@ def fetch_live_flight():
 
         matched_flight = None
 
-        # 1. ゲート番号が一致するフライトを探す
+        # 指定ゲートの便を探索
         for item in departures:
             if not isinstance(item, dict):
                 continue
             flight_info = item.get("flight") or {}
             
-            # 各種キーからのゲート番号取得（安全アクセスの徹底）
-            status_obj = flight_info.get("status") or {}
-            generic_obj = status_obj.get("generic") or {}
-            gate1 = (generic_obj.get("status") or {}).get("gate")
-            
-            origin_obj = flight_info.get("origin") or {}
-            gate2 = (origin_obj.get("info") or {}).get("gate")
-
+            gate1 = ((flight_info.get("status") or {}).get("generic") or {}).get("status", {}).get("gate")
+            gate2 = ((flight_info.get("origin") or {}).get("info") or {}).get("gate")
             current_gate = str(gate1 or gate2 or "").strip().upper()
 
             if current_gate and current_gate == target_gate:
                 matched_flight = flight_info
                 break
 
-        # 2. もし一致するゲートが見つからない場合、出発予定の先頭便をフォールバック取得
+        # 見つからない場合は出発先頭便をフォールバック
         if not matched_flight and departures:
             first_item = departures[0]
             if isinstance(first_item, dict):
                 matched_flight = first_item.get("flight")
 
-        # フライト情報が抽出できた場合
         if matched_flight and isinstance(matched_flight, dict):
             airline_obj = matched_flight.get("airline") or {}
             airline_code = (airline_obj.get("code") or {}).get("iata") or "ANA"
@@ -120,8 +122,7 @@ def fetch_live_flight():
             dest_name_ja = AIRPORT_NAME_MAP.get(dest_iata, dest_name_en)
 
             time_obj = matched_flight.get("time") or {}
-            sched_obj = time_obj.get("scheduled") or {}
-            std_timestamp = sched_obj.get("departure")
+            std_timestamp = (time_obj.get("scheduled") or {}).get("departure")
 
             dep_time = "07:10"
             if std_timestamp:
@@ -161,14 +162,16 @@ def fetch_live_flight():
         else:
             return jsonify({
                 "status": "error",
-                "message": f"[{airport_code}] のデータ取得に成功しましたが、出発予定の便情報が見つかりませんでした。"
-            }), 404
+                "message": f"[{airport_code}] の {target_gate}番ゲートに該当する便が見つかりませんでした。"
+            }), 200
 
     except Exception as e:
+        # 通信拒否やスクレイピングブロックが発生しても、アプリを落とさず安全にレスポンスする
+        print(f"FR24 Fetch Error: {e}")
         return jsonify({
             "status": "error",
-            "message": f"FlightRadar24通信エラー: {str(e)}"
-        }), 500
+            "message": f"FlightRadar24への接続がブロックされました（手動設定をご利用ください）: {str(e)}"
+        }), 200
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
