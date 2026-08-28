@@ -1,4 +1,3 @@
-flask
-requests
+Flask
 gunicorn
-FlightRadar24
+FlightRadarAPI
