@@ -13,6 +13,7 @@ except ImportError:
     fr_api = None
     has_fr24 = False
 
+# 主要空港のIATAコードから日本語表示名への変換マップ
 AIRPORT_NAME_MAP = {
     "HND": "東京/羽田", "NRT": "東京/成田", "ITM": "大阪/伊丹", "KIX": "大阪/関西",
     "FUK": "福岡", "CTS": "新千歳", "NGO": "中部", "OKA": "沖縄/那覇",
@@ -20,6 +21,7 @@ AIRPORT_NAME_MAP = {
     "SDJ": "仙台", "AOJ": "青森", "AKJ": "旭川", "HKD": "函館", "MYJ": "松山"
 }
 
+# デフォルトの画面表示データ
 current_flight_data = {
     "gate": "5",
     "title_ja": "搭乗ご案内",
@@ -57,16 +59,19 @@ def get_weather():
 
 @app.route("/api/fetch-live-flight", methods=["POST"])
 def fetch_live_flight():
+    """空港コードとゲート番号をキーにしてリアルタイム情報を検索"""
     global current_flight_data
     req_data = request.json or {}
     
-    airport_code = req_data.get("airport_code") or req_data.get("airport") or "HND"
-    target_gate = str(req_data.get("gate_number") or req_data.get("gate") or "5").strip()
+    # リクエストから空港名（IATA）とゲート番号を取得
+    airport_code = str(req_data.get("airport_code") or req_data.get("airport") or "HND").strip().upper()
+    target_gate = str(req_data.get("gate_number") or req_data.get("gate") or "5").strip().upper()
 
     if not has_fr24:
-        return jsonify({"status": "error", "message": "FlightRadarAPI未インストール"}), 500
+        return jsonify({"status": "error", "message": "FlightRadarAPIがサーバーにありません"}), 500
 
     try:
+        # 指定空港の運行スケジュールを取得
         details = fr_api.get_airport_details(airport_code)
         plugin_data = details.get("pluginData", {})
         schedule = plugin_data.get("schedule", {})
@@ -74,29 +79,38 @@ def fetch_live_flight():
 
         matched_flight = None
 
+        # 出発予定一覧の中から、指定されたゲート番号と一致するフライトを探索
         for item in departures:
             flight_info = item.get("flight", {})
-            gate = flight_info.get("status", {}).get("generic", {}).get("status", {}).get("gate") or flight_info.get("origin", {}).get("info", {}).get("gate")
-            if gate and str(gate).strip().upper() == target_gate.upper():
+            
+            # FR24のレスポンス構造からゲート情報を柔軟に取得
+            gate_in_status = flight_info.get("status", {}).get("generic", {}).get("status", {}).get("gate")
+            gate_in_origin = flight_info.get("origin", {}).get("info", {}).get("gate")
+            current_gate = str(gate_in_status or gate_in_origin or "").strip().upper()
+
+            if current_gate == target_gate:
                 matched_flight = flight_info
                 break
 
-        if not matched_flight and departures:
-            matched_flight = departures[0].get("flight", {})
-
+        # 該当するゲートの便が見つかった場合
         if matched_flight:
+            # 1. 航空会社コード & 便名
             airline_code = matched_flight.get("airline", {}).get("code", {}).get("iata") or "ANA"
             flight_number = matched_flight.get("identification", {}).get("number", {}).get("default") or f"{airline_code}100"
+            
+            # 2. 到着地
             dest_iata = matched_flight.get("destination", {}).get("code", {}).get("iata") or "ITM"
             dest_name_en = matched_flight.get("destination", {}).get("name") or "OSAKA"
             dest_name_ja = AIRPORT_NAME_MAP.get(dest_iata, dest_name_en)
 
+            # 3. 出発予定時刻（STD）
             std_timestamp = matched_flight.get("time", {}).get("scheduled", {}).get("departure")
             dep_time = "07:10"
             if std_timestamp:
                 dep_time = datetime.fromtimestamp(std_timestamp).strftime("%H:%M")
 
-            status_text = matched_flight.get("status", {}).get("text") or "Scheduled"
+            # 4. 案内ステータス
+            status_text = str(matched_flight.get("status", {}).get("text") or "")
             title_ja = "搭乗ご案内"
             title_en = "BOARDING INFORMATION"
 
@@ -106,16 +120,17 @@ def fetch_live_flight():
             elif "Delayed" in status_text:
                 title_ja = "出発遅延"
                 title_en = "DELAYED"
-            elif "Canceled" in status_text:
+            elif "Canceled" in status_text or "Cancelled" in status_text:
                 title_ja = "欠航"
                 title_en = "CANCELLED"
 
+            # 画面表示用のデータを一括更新
             current_flight_data.update({
                 "gate": target_gate,
                 "title_ja": title_ja,
                 "title_en": title_en,
                 "destination_ja": dest_name_ja,
-                "destination_en": dest_name_en.upper(),
+                "destination_en": str(dest_name_en).upper(),
                 "airline_code": airline_code,
                 "flight_no": flight_number,
                 "departure_time": dep_time,
@@ -123,11 +138,16 @@ def fetch_live_flight():
             })
 
             return jsonify({"status": "success", "data": current_flight_data})
+
         else:
-            return jsonify({"status": "error", "message": "該当便なし"}), 404
+            # 指定ゲートにフライト情報が割り当てられていない場合
+            return jsonify({
+                "status": "error", 
+                "message": f"空港 [{airport_code}] の {target_gate} 番ゲートには現在出発予定の便情報がありません。"
+            }), 404
 
     except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+        return jsonify({"status": "error", "message": f"データ取得エラー: {str(e)}"}), 500
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
