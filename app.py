@@ -1,9 +1,14 @@
 import os
 from flask import Flask, render_template, jsonify, request
-from FlightRadar24 import FlightRadar24API
+
+# FlightRadar24APIのインポート（未インストールの場合は例外ハンドリング）
+try:
+    from FlightRadar24 import FlightRadar24API
+    fr_api = FlightRadar24API()
+except ImportError:
+    fr_api = None
 
 app = Flask(__name__)
-fr_api = FlightRadar24API()
 
 # 現在案内板に表示しているデータ（初期値）
 current_flight_data = {
@@ -52,6 +57,12 @@ def get_weather():
 @app.route("/api/fetch-live-flight", methods=["POST"])
 def fetch_live_flight():
     """FlightRadar24からリアルタイム便情報を探索・反映"""
+    if fr_api is None:
+        return jsonify({
+            "status": "error",
+            "message": "FlightRadar24 API ライブラリがインストールされていません"
+        }), 500
+
     req_data = request.json or {}
     airport_code = req_data.get("airport_code", "HND")
     gate_number = req_data.get("gate_number", "5")
@@ -86,10 +97,10 @@ def fetch_live_flight():
             return jsonify({
                 "status": "error", 
                 "message": f"{airport_code} 出発のリアルタイム便が見つかりませんでした"
-            }), 444
+            }), 404
 
     except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+        return jsonify({"status": "error", "message": f"APIエラー: {str(e)}"}), 500
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
