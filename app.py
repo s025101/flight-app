@@ -1,8 +1,12 @@
 from flask import Flask, render_template, jsonify, request
 import requests
 from datetime import datetime
+from FlightRadar24 import FlightRadar24API
 
 app = Flask(__name__, static_folder='web', static_url_path='/web')
+
+# FlightRadar24 API クライアントの初期化
+fr_api = FlightRadar24API()
 
 # 日本全国の主要・地方空港マッピング（天気取得用）
 AIRPORT_COORDS = {
@@ -106,6 +110,18 @@ AIRPORT_COORDS = {
     "粟国": {"lat": 26.5928, "lon": 127.2386}
 }
 
+# 目的地名から座標マッピングキーおよび英語表示への辞書
+DEST_INFO_MAP = {
+    "ITM": {"ja": "伊丹", "en": "OSAKA/ITAMI"},
+    "KIX": {"ja": "関西", "en": "OSAKA/KANSAI"},
+    "HND": {"ja": "羽田", "en": "TOKYO/HANEDA"},
+    "NRT": {"ja": "成田", "en": "TOKYO/NARITA"},
+    "FUK": {"ja": "福岡", "en": "FUKUOKA"},
+    "CTS": {"ja": "新千歳", "en": "NEW CHITOSE"},
+    "NGO": {"ja": "中部", "en": "NAGOYA/CENTRAIR"},
+    "OKA": {"ja": "那覇", "en": "OKINAWA/NAHA"},
+}
+
 # WMO天気コードを絵文字に変換する辞書
 WEATHER_ICONS = {
     0: "☀️",          # 快晴
@@ -136,6 +152,22 @@ flight_data = {
     "weather_date": datetime.now().strftime("%m月%d日")
 }
 
+def fetch_weather_internal(dest_ja):
+    coords = AIRPORT_COORDS.get(dest_ja, AIRPORT_COORDS["伊丹"])
+    try:
+        url = f"https://api.open-meteo.com/v1/forecast?latitude={coords['lat']}&longitude={coords['lon']}&current_weather=true"
+        response = requests.get(url, timeout=5)
+        data = response.json()
+        if "current_weather" in data:
+            current = data["current_weather"]
+            temp = f"{round(current['temperature'])}°C"
+            weather_code = current.get("weathercode", 0)
+            icon = WEATHER_ICONS.get(weather_code, "☀️")
+            return icon, temp
+    except Exception as e:
+        print("天気API取得エラー:", e)
+    return "☀️", "--°C"
+
 @app.route('/')
 def index():
     return render_template('main.html')
@@ -155,28 +187,73 @@ def update_flight_data():
 @app.route('/api/weather', methods=['GET'])
 def get_weather():
     dest = request.args.get('destination', '伊丹')
-    coords = AIRPORT_COORDS.get(dest, AIRPORT_COORDS["伊丹"])
-    
-    try:
-        # Open-Meteo APIからリアルタイム天気を取得
-        url = f"https://api.open-meteo.com/v1/forecast?latitude={coords['lat']}&longitude={coords['lon']}&current_weather=true"
-        response = requests.get(url, timeout=5)
-        data = response.json()
-        
-        if "current_weather" in data:
-            current = data["current_weather"]
-            temp = f"{round(current['temperature'])}°C"
-            weather_code = current.get("weathercode", 0)
-            icon = WEATHER_ICONS.get(weather_code, "☀️")
-            return jsonify({"icon": icon, "temp": temp})
-    except Exception as e:
-        print("天気API取得エラー:", e)
-        
-    return jsonify({"icon": "☀️", "temp": "--°C"})
+    icon, temp = fetch_weather_internal(dest)
+    return jsonify({"icon": icon, "temp": temp})
 
 @app.route('/api/fetch-live-flight', methods=['POST'])
 def fetch_live_flight():
-    return jsonify({"status": "error", "message": "リアルタイム取得機能は準備中です"})
+    global flight_data
+    req_data = request.get_json() or {}
+    airport_code = req_data.get('airport_code', 'HND')
+    gate_number = str(req_data.get('gate_number', '5')).strip()
+
+    try:
+        # 空港の詳細スケジュールを取得
+        details = fr_api.get_airport_details(airport_code)
+        plugin_data = details.get('pluginData', {})
+        schedule = plugin_data.get('schedule', {})
+        departures = schedule.get('departures', {}).get('data', [])
+
+        target_flight = None
+        for item in departures:
+            f = item.get('flight', {})
+            gate = str(f.get('airport', {}).get('origin', {}).get('info', {}).get('gate', '') or '').strip()
+            # ゲート番号の照合（大文字小文字無視・前方一致なども考慮）
+            if gate and (gate.lower() == gate_number.lower()):
+                target_flight = f
+                break
+
+        if not target_flight and departures:
+            # ゲートが一致しない場合は最新の出発予定便を取得（フォールバック）
+            target_flight = departures[0].get('flight', {})
+
+        if target_flight:
+            airline_code = target_flight.get('airline', {}).get('code', {}).get('icao', 'ANA')
+            flight_num = target_flight.get('identification', {}).get('number', {}).get('default', '')
+            
+            dest_iata = target_flight.get('airport', {}).get('destination', {}).get('code', {}).get('iata', '')
+            dest_info = DEST_INFO_MAP.get(dest_iata, {"ja": "伊丹", "en": "OSAKA/ITAMI"})
+
+            std_timestamp = target_flight.get('time', {}).get('scheduled', {}).get('departure')
+            if std_timestamp:
+                departure_time = datetime.fromtimestamp(std_timestamp).strftime('%H:%M')
+            else:
+                departure_time = "00:00"
+
+            icon, temp = fetch_weather_internal(dest_info["ja"])
+
+            updated_data = {
+                "gate": gate_number,
+                "title_ja": "搭乗ご案内",
+                "title_en": "BOARDING INFORMATION",
+                "destination_ja": dest_info["ja"],
+                "destination_en": dest_info["en"],
+                "airline_code": airline_code,
+                "flight_no": flight_num or f"{airline_code}123",
+                "departure_time": departure_time,
+                "boarding_time": departure_time,
+                "weather_icon": icon,
+                "weather_temp": temp,
+                "weather_date": datetime.now().strftime("%m月%d日")
+            }
+            flight_data.update(updated_data)
+            return jsonify({"status": "success", "data": flight_data})
+        else:
+            return jsonify({"status": "error", "message": "指定されたゲートの便が見つかりませんでした"})
+
+    except Exception as e:
+        print("FlightRadar24 API取得エラー:", e)
+        return jsonify({"status": "error", "message": f"ライブデータ取得失敗: {str(e)}"})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
