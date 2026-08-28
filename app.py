@@ -9,11 +9,10 @@ try:
     from FlightRadar24 import FlightRadar24API
     fr_api = FlightRadar24API()
     has_fr24 = True
-except ImportError:
+except Exception:
     fr_api = None
     has_fr24 = False
 
-# 主要空港のIATAコードから日本語表示名への変換マップ
 AIRPORT_NAME_MAP = {
     "HND": "東京/羽田", "NRT": "東京/成田", "ITM": "大阪/伊丹", "KIX": "大阪/関西",
     "FUK": "福岡", "CTS": "新千歳", "NGO": "中部", "OKA": "沖縄/那覇",
@@ -21,7 +20,6 @@ AIRPORT_NAME_MAP = {
     "SDJ": "仙台", "AOJ": "青森", "AKJ": "旭川", "HKD": "函館", "MYJ": "松山"
 }
 
-# デフォルトの画面表示データ
 current_flight_data = {
     "gate": "5",
     "title_ja": "搭乗ご案内",
@@ -59,58 +57,80 @@ def get_weather():
 
 @app.route("/api/fetch-live-flight", methods=["POST"])
 def fetch_live_flight():
-    """空港コードとゲート番号をキーにしてリアルタイム情報を検索"""
+    """空港コードとゲート番号をキーにしてリアルタイム情報を取得（安全設計）"""
     global current_flight_data
     req_data = request.json or {}
     
-    # リクエストから空港名（IATA）とゲート番号を取得
     airport_code = str(req_data.get("airport_code") or req_data.get("airport") or "HND").strip().upper()
     target_gate = str(req_data.get("gate_number") or req_data.get("gate") or "5").strip().upper()
 
-    if not has_fr24:
-        return jsonify({"status": "error", "message": "FlightRadarAPIがサーバーにありません"}), 500
+    if not has_fr24 or not fr_api:
+        return jsonify({"status": "error", "message": "FlightRadar24 APIが使用できません。"}), 500
 
     try:
-        # 指定空港の運行スケジュールを取得
+        # 空港詳細を取得（例外が発生しても落ちないようにケア）
         details = fr_api.get_airport_details(airport_code)
-        plugin_data = details.get("pluginData", {})
-        schedule = plugin_data.get("schedule", {})
-        departures = schedule.get("departures", {}).get("data", [])
+        if not isinstance(details, dict):
+            details = {}
+
+        plugin_data = details.get("pluginData") or {}
+        schedule = plugin_data.get("schedule") or {}
+        departures_data = schedule.get("departures") or {}
+        departures = departures_data.get("data") or []
 
         matched_flight = None
 
-        # 出発予定一覧の中から、指定されたゲート番号と一致するフライトを探索
+        # 1. ゲート番号が一致するフライトを探す
         for item in departures:
-            flight_info = item.get("flight", {})
+            if not isinstance(item, dict):
+                continue
+            flight_info = item.get("flight") or {}
             
-            # FR24のレスポンス構造からゲート情報を柔軟に取得
-            gate_in_status = flight_info.get("status", {}).get("generic", {}).get("status", {}).get("gate")
-            gate_in_origin = flight_info.get("origin", {}).get("info", {}).get("gate")
-            current_gate = str(gate_in_status or gate_in_origin or "").strip().upper()
+            # 各種キーからのゲート番号取得（安全アクセスの徹底）
+            status_obj = flight_info.get("status") or {}
+            generic_obj = status_obj.get("generic") or {}
+            gate1 = (generic_obj.get("status") or {}).get("gate")
+            
+            origin_obj = flight_info.get("origin") or {}
+            gate2 = (origin_obj.get("info") or {}).get("gate")
 
-            if current_gate == target_gate:
+            current_gate = str(gate1 or gate2 or "").strip().upper()
+
+            if current_gate and current_gate == target_gate:
                 matched_flight = flight_info
                 break
 
-        # 該当するゲートの便が見つかった場合
-        if matched_flight:
-            # 1. 航空会社コード & 便名
-            airline_code = matched_flight.get("airline", {}).get("code", {}).get("iata") or "ANA"
-            flight_number = matched_flight.get("identification", {}).get("number", {}).get("default") or f"{airline_code}100"
-            
-            # 2. 到着地
-            dest_iata = matched_flight.get("destination", {}).get("code", {}).get("iata") or "ITM"
-            dest_name_en = matched_flight.get("destination", {}).get("name") or "OSAKA"
+        # 2. もし一致するゲートが見つからない場合、出発予定の先頭便をフォールバック取得
+        if not matched_flight and departures:
+            first_item = departures[0]
+            if isinstance(first_item, dict):
+                matched_flight = first_item.get("flight")
+
+        # フライト情報が抽出できた場合
+        if matched_flight and isinstance(matched_flight, dict):
+            airline_obj = matched_flight.get("airline") or {}
+            airline_code = (airline_obj.get("code") or {}).get("iata") or "ANA"
+
+            ident_obj = matched_flight.get("identification") or {}
+            flight_number = (ident_obj.get("number") or {}).get("default") or f"{airline_code}100"
+
+            dest_obj = matched_flight.get("destination") or {}
+            dest_iata = (dest_obj.get("code") or {}).get("iata") or "ITM"
+            dest_name_en = dest_obj.get("name") or "OSAKA"
             dest_name_ja = AIRPORT_NAME_MAP.get(dest_iata, dest_name_en)
 
-            # 3. 出発予定時刻（STD）
-            std_timestamp = matched_flight.get("time", {}).get("scheduled", {}).get("departure")
+            time_obj = matched_flight.get("time") or {}
+            sched_obj = time_obj.get("scheduled") or {}
+            std_timestamp = sched_obj.get("departure")
+
             dep_time = "07:10"
             if std_timestamp:
-                dep_time = datetime.fromtimestamp(std_timestamp).strftime("%H:%M")
+                try:
+                    dep_time = datetime.fromtimestamp(std_timestamp).strftime("%H:%M")
+                except Exception:
+                    pass
 
-            # 4. 案内ステータス
-            status_text = str(matched_flight.get("status", {}).get("text") or "")
+            status_text = str((matched_flight.get("status") or {}).get("text") or "")
             title_ja = "搭乗ご案内"
             title_en = "BOARDING INFORMATION"
 
@@ -124,7 +144,6 @@ def fetch_live_flight():
                 title_ja = "欠航"
                 title_en = "CANCELLED"
 
-            # 画面表示用のデータを一括更新
             current_flight_data.update({
                 "gate": target_gate,
                 "title_ja": title_ja,
@@ -140,14 +159,16 @@ def fetch_live_flight():
             return jsonify({"status": "success", "data": current_flight_data})
 
         else:
-            # 指定ゲートにフライト情報が割り当てられていない場合
             return jsonify({
-                "status": "error", 
-                "message": f"空港 [{airport_code}] の {target_gate} 番ゲートには現在出発予定の便情報がありません。"
+                "status": "error",
+                "message": f"[{airport_code}] のデータ取得に成功しましたが、出発予定の便情報が見つかりませんでした。"
             }), 404
 
     except Exception as e:
-        return jsonify({"status": "error", "message": f"データ取得エラー: {str(e)}"}), 500
+        return jsonify({
+            "status": "error",
+            "message": f"FlightRadar24通信エラー: {str(e)}"
+        }), 500
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
