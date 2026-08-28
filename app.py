@@ -1,175 +1,130 @@
-import os
-from datetime import datetime
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, request, jsonify, render_template
+from FlightRadar24 import FlightRadar24API
+import requests
 
 app = Flask(__name__)
+fr_api = FlightRadar24API()
 
-# FlightRadarAPI の安全なインポート
-try:
-    from FlightRadar24 import FlightRadar24API
-    fr_api = FlightRadar24API()
-    has_fr24 = True
-except Exception as e:
-    print(f"FR24 Init Error: {e}")
-    fr_api = None
-    has_fr24 = False
-
-AIRPORT_NAME_MAP = {
-    "HND": "東京/羽田", "NRT": "東京/成田", "ITM": "大阪/伊丹", "KIX": "大阪/関西",
-    "FUK": "福岡", "CTS": "新千歳", "NGO": "中部", "OKA": "沖縄/那覇",
-    "HIJ": "広島", "KCZ": "高知", "MMJ": "松本", "KMJ": "熊本", "KOJ": "鹿児島",
-    "SDJ": "仙台", "AOJ": "青森", "AKJ": "旭川", "HKD": "函館", "MYJ": "松山", "NTQ": "能登"
-}
-
-current_flight_data = {
-    "gate": "5",
-    "title_ja": "搭乗ご案内",
-    "title_en": "BOARDING INFORMATION",
-    "destination_ja": "大阪/伊丹",
-    "destination_en": "OSAKA/ITAMI",
-    "airline_code": "ANA",
-    "flight_no": "ANA420",
-    "departure_time": "07:10",
-    "boarding_time": "06:50",
-    "weather_icon": "☀️☁️",
-    "weather_temp": "21°C",
-    "weather_date": "8月25日"
-}
-
-@app.route("/")
+@app.route('/')
 def index():
-    return render_template("main.html")
+    return render_template('index.html')
 
-@app.route("/api/flight-data", methods=["GET"])
-def get_flight_data():
-    return jsonify(current_flight_data)
-
-@app.route("/api/update-flight-data", methods=["POST"])
-def update_flight_data():
-    global current_flight_data
-    data = request.json
-    if data:
-        current_flight_data.update(data)
-    return jsonify(current_flight_data)
-
-@app.route("/api/weather", methods=["GET"])
-def get_weather():
-    return jsonify({"icon": "☀️", "temp": "22°C"})
-
-@app.route("/api/fetch-live-flight", methods=["POST"])
+@app.route('/api/fetch-live-flight', methods=['POST'])
 def fetch_live_flight():
-    """空港コードとゲート番号をキーにしてリアルタイム情報を取得"""
-    global current_flight_data
-    req_data = request.json or {}
-    
-    airport_code = str(req_data.get("airport_code") or req_data.get("airport") or "HND").strip().upper()
-    target_gate = str(req_data.get("gate_number") or req_data.get("gate") or "5").strip().upper()
-
-    if not has_fr24 or fr_api is None:
-        return jsonify({
-            "status": "error",
-            "message": "FlightRadar24ライブラリが利用できません。"
-        }), 200
-
     try:
-        details = fr_api.get_airport_details(airport_code)
+        data = request.get_json() or {}
         
-        if not details or not isinstance(details, dict):
+        # パラメータの取得（front側からのキー表記ゆれに対応）
+        airport_code = data.get('airport_code') or data.get('airport') or 'HND'
+        target_gate = str(data.get('gate_number') or data.get('gate') or '').strip()
+
+        # 空港の詳細・スケジュールの取得（get_airport_details ではなく get_airport を使用）
+        # ※ライブラリ仕様により airport オブジェクトまたは辞書を取得
+        try:
+            airport_info = fr_api.get_airport(airport_code)
+        except Exception as e:
+            # 万が一 get_airport が使えない場合のフォールバック（API直叩き等）
             return jsonify({
                 "status": "error",
-                "message": "FlightRadar24からの応答データが空でした。"
-            }), 200
+                "message": f"空港情報の取得に失敗しました: {str(e)}"
+            }), 400
 
-        plugin_data = details.get("pluginData") or {}
-        schedule = plugin_data.get("schedule") or {}
-        departures_data = schedule.get("departures") or {}
-        departures = departures_data.get("data") or []
+        # 出発予定便リストの探索
+        # ※FlightRadar24APIのレスポンス構造から出発便を取り出します
+        plugin_data = getattr(airport_info, 'plugin_data', {}) or {}
+        schedule = plugin_data.get('schedule', {}) or {}
+        departures = schedule.get('departures', {}).get('data', [])
 
         matched_flight = None
 
-        # 1. 指定ゲートの便を探す
-        for item in departures:
-            if not isinstance(item, dict):
-                continue
-            flight_info = item.get("flight") or {}
-            
-            gate1 = ((flight_info.get("status") or {}).get("generic") or {}).get("status", {}).get("gate")
-            gate2 = ((flight_info.get("origin") or {}).get("info") or {}).get("gate")
-            current_gate = str(gate1 or gate2 or "").strip().upper()
+        # 1. 指定されたゲート番号に一致する便を検索
+        if target_gate:
+            for item in departures:
+                flight = item.get('flight', {})
+                # ゲート情報の取得
+                gate = str(flight.get('status', {}).get('generic', {}).get('status', {}).get('gate') or 
+                           flight.get('airport', {}).get('origin', {}).get('info', {}).get('gate') or '').strip()
+                
+                if gate == target_gate:
+                    matched_flight = flight
+                    break
 
-            if current_gate and current_gate == target_gate:
-                matched_flight = flight_info
-                break
-
-        # 2. 見つからない場合は出発予定の先頭便をフォールバック
+        # 2. ゲート一致が見つからない場合、直近の出発便を1件取得
         if not matched_flight and departures:
-            first_item = departures[0]
-            if isinstance(first_item, dict):
-                matched_flight = first_item.get("flight")
+            matched_flight = departures[0].get('flight', {})
 
-        if matched_flight and isinstance(matched_flight, dict):
-            airline_obj = matched_flight.get("airline") or {}
-            airline_code = (airline_obj.get("code") or {}).get("iata") or "ANA"
-
-            ident_obj = matched_flight.get("identification") or {}
-            flight_number = (ident_obj.get("number") or {}).get("default") or f"{airline_code}100"
-
-            dest_obj = matched_flight.get("destination") or {}
-            dest_iata = (dest_obj.get("code") or {}).get("iata") or "ITM"
-            dest_name_en = dest_obj.get("name") or "OSAKA"
-            dest_name_ja = AIRPORT_NAME_MAP.get(dest_iata, dest_name_en)
-
-            time_obj = matched_flight.get("time") or {}
-            std_timestamp = (time_obj.get("scheduled") or {}).get("departure")
-
-            dep_time = "07:10"
-            if std_timestamp:
-                try:
-                    dep_time = datetime.fromtimestamp(std_timestamp).strftime("%H:%M")
-                except Exception:
-                    pass
-
-            status_text = str((matched_flight.get("status") or {}).get("text") or "")
-            title_ja = "搭乗ご案内"
-            title_en = "BOARDING INFORMATION"
-
-            if "Boarding" in status_text:
-                title_ja = "ご搭乗中"
-                title_en = "NOW BOARDING"
-            elif "Delayed" in status_text:
-                title_ja = "出発遅延"
-                title_en = "DELAYED"
-            elif "Canceled" in status_text or "Cancelled" in status_text:
-                title_ja = "欠航"
-                title_en = "CANCELLED"
-
-            current_flight_data.update({
-                "gate": target_gate,
-                "title_ja": title_ja,
-                "title_en": title_en,
-                "destination_ja": dest_name_ja,
-                "destination_en": str(dest_name_en).upper(),
-                "airline_code": airline_code,
-                "flight_no": flight_number,
-                "departure_time": dep_time,
-                "boarding_time": dep_time
-            })
-
-            return jsonify({"status": "success", "data": current_flight_data})
-
-        else:
+        if not matched_flight:
             return jsonify({
                 "status": "error",
-                "message": f"[{airport_code}] の {target_gate}番ゲートに該当する便が見つかりませんでした。"
-            }), 200
+                "message": f"空港 {airport_code} (ゲート: {target_gate}) の対象便が見つかりませんでした。"
+            }), 444
+
+        # 取得できた便データの抽出・整頓
+        airline_code = matched_flight.get('airline', {}).get('code', {}).get('ica0', 'ANA')
+        flight_number = matched_flight.get('identification', {}).get('number', {}).get('default', '')
+        
+        # 行き先空港の名称
+        dest_name = matched_flight.get('airport', {}).get('destination', {}).get('name', '')
+        dest_code = matched_flight.get('airport', {}).get('destination', {}).get('code', {}).get('iata', '')
+        
+        # 時刻情報
+        time_details = matched_flight.get('time', {})
+        std_timestamp = time_details.get('scheduled', {}).get('departure')
+        
+        import datetime
+        std_str = "07:10"
+        if std_timestamp:
+            std_dt = datetime.datetime.fromtimestamp(std_timestamp)
+            std_str = std_dt.strftime('%H:%M')
+
+        # フロントエンドが期待するフォーマットで返却
+        response_data = {
+            "status": "success",
+            "data": {
+                "gate": target_gate or "5",
+                "title_ja": "搭乗ご案内",
+                "title_en": "BOARDING INFORMATION",
+                "destination_ja": dest_name or dest_code or "大阪/伊丹",
+                "destination_en": dest_code or "ITM",
+                "airline_code": airline_code,
+                "flight_no": flight_number or f"{airline_code}123",
+                "departure_time": std_str,
+                "boarding_time": std_str,
+                "weather_icon": "☀️",
+                "weather_temp": "22°C",
+                "weather_date": datetime.date.today().strftime('%m月%d日')
+            }
+        }
+        return jsonify(response_data)
 
     except Exception as e:
         print(f"FR24 Fetch Error: {e}")
         return jsonify({
             "status": "error",
-            "message": f"リアルタイム情報の取得に失敗しました: {str(e)}"
-        }), 200
+            "message": f"リアルタイム情報の取得中にエラーが発生しました: {str(e)}"
+        }), 500
 
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=True)
+@app.route('/api/update-flight-data', methods=['POST'])
+def update_flight_data():
+    data = request.get_json()
+    return jsonify(data)
+
+@app.route('/api/flight-data', methods=['GET'])
+def get_flight_data():
+    return jsonify({
+        "gate": "5",
+        "title_ja": "搭乗ご案内",
+        "title_en": "BOARDING INFORMATION",
+        "destination_ja": "大阪/伊丹",
+        "destination_en": "OSAKA/ITAMI",
+        "airline_code": "ANA",
+        "flight_no": "ANA420",
+        "departure_time": "07:10",
+        "boarding_time": "06:50",
+        "weather_icon": "☀️☁️",
+        "weather_temp": "21°C",
+        "weather_date": "8月25日"
+    })
+
+if __name__ == '__main__':
+    app.run(debug=True, host='0.0.0.0', port=5000)
