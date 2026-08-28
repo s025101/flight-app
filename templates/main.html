@@ -636,7 +636,6 @@
     }
 
     function setLogoImage(imgElement, airlineCode) {
-      if (!imgElement) return;
       imgElement.setAttribute('data-airline-code', airlineCode);
       imgElement.src = `/web/logos/${airlineCode}.png`;
     }
@@ -674,8 +673,8 @@
         const res = await fetch(`/api/weather?destination=${encodeURIComponent(destJa)}`);
         const weatherData = await res.json();
         if (weatherData) {
-          if (weatherData.icon) document.getElementById('weather_icon').value = weatherData.icon;
-          if (weatherData.temp) document.getElementById('weather_temp').value = weatherData.temp;
+          document.getElementById('weather_icon').value = weatherData.icon || '☀️';
+          document.getElementById('weather_temp').value = weatherData.temp || '--°C';
         }
       } catch (e) {
         console.error('天気取得エラー:', e);
@@ -690,20 +689,11 @@
         const res = await fetch('/api/fetch-live-flight', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            airport_code: airport,
-            airport: airport,
-            gate_number: gate,
-            gate: gate
-          })
+          body: JSON.stringify({ airport_code: airport, gate_number: gate })
         });
         const result = await res.json();
-        
-        const flightData = result.data || result;
-
-        if (result.status === "success" || result.data || flightData.flight_no || flightData.flight_number) {
-          updateFormInputs(flightData);
-          renderData(flightData);
+        if (result.status === "success") {
+          renderData(result.data);
           alert("リアルタイムデータを反映しました！");
         } else {
           alert(result.message || "便情報が見つかりませんでした");
@@ -714,123 +704,32 @@
       }
     }
 
-    function updateFormInputs(data) {
-      if (!data) return;
-
-      // ゲート番号
-      const gateVal = data.gate || data.gate_number;
-      if (gateVal !== undefined && gateVal !== null) {
-        document.getElementById('gate').value = gateVal;
-      }
-
-      // 案内タイトル
-      const titleJa = data.title_ja || data.title;
-      if (titleJa) {
-        const select = document.getElementById('title_select');
-        for (let opt of select.options) {
-          const [optJa] = opt.value.split('|');
-          if (optJa === titleJa) {
-            select.value = opt.value;
-            break;
-          }
-        }
-      }
-
-      // 行き先
-      const destJa = data.destination_ja || data.destination;
-      if (destJa) {
-        const select = document.getElementById('destination');
-        for (let opt of select.options) {
-          const [optJa] = opt.value.split('|');
-          if (optJa === destJa || opt.text.includes(destJa)) {
-            select.value = opt.value;
-            break;
-          }
-        }
-      }
-
-      // 航空会社コード
-      const airlineCode = data.airline_code || data.airline;
-      if (airlineCode) {
-        const select = document.getElementById('airline_code');
-        for (let opt of select.options) {
-          if (opt.value === airlineCode) {
-            select.value = airlineCode;
-            break;
-          }
-        }
-      }
-
-      // 便名
-      const rawFlightNo = data.flight_no || data.flight_number;
-      if (rawFlightNo) {
-        const numOnly = rawFlightNo.toString().replace(/[^0-9]/g, '');
-        document.getElementById('flight_num').value = numOnly || rawFlightNo;
-      }
-
-      // 時刻関連
-      const depTime = data.departure_time || data.std || data.scheduled_time;
-      if (depTime !== undefined && depTime !== null) {
-        document.getElementById('departure_time').value = depTime;
-      }
-
-      const boardTime = data.boarding_time || data.etd;
-      if (boardTime !== undefined && boardTime !== null) {
-        document.getElementById('boarding_time').value = boardTime;
-      }
-
-      // 天気関連
-      if (data.weather_icon !== undefined && data.weather_icon !== null) {
-        document.getElementById('weather_icon').value = data.weather_icon;
-      }
-      if (data.weather_temp !== undefined && data.weather_temp !== null) {
-        document.getElementById('weather_temp').value = data.weather_temp;
-      }
-      if (data.weather_date !== undefined && data.weather_date !== null) {
-        document.getElementById('weather_date').value = data.weather_date;
-      }
-    }
-
     function renderData(data) {
       if (!data) return;
-
-      const gateVal = data.gate || data.gate_number || document.getElementById('gate').value;
-      document.getElementById('disp_gate').innerText = gateVal || '';
+      document.getElementById('disp_gate').innerText = data.gate || '';
       
       const titleBlock = document.getElementById('disp_title_block');
-      const titleJa = data.title_ja || data.title || document.getElementById('title_select').value.split('|')[0];
-      const titleEn = data.title_en || document.getElementById('title_select').value.split('|')[1] || '';
-      
-      document.getElementById('disp_title_ja').innerText = titleJa;
-      document.getElementById('disp_title_en').innerText = titleEn;
+      document.getElementById('disp_title_ja').innerText = data.title_ja || '';
+      document.getElementById('disp_title_en').innerText = data.title_en || '';
 
-      if (titleJa === "ご搭乗中" || titleJa === "最終案内") {
+      if (data.title_ja === "ご搭乗中" || data.title_ja === "最終案内") {
         titleBlock.classList.add('blink');
       } else {
         titleBlock.classList.remove('blink');
       }
 
-      const destJa = data.destination_ja || data.destination || document.getElementById('destination').value.split('|')[0];
-      const destEn = data.destination_en || document.getElementById('destination').value.split('|')[1] || '';
-      document.getElementById('disp_dest_ja').innerText = destJa;
-      document.getElementById('disp_dest_en').innerText = destEn;
+      document.getElementById('disp_dest_ja').innerText = data.destination_ja || '';
+      document.getElementById('disp_dest_en').innerText = data.destination_en || '';
       
-      const airlineCode = data.airline_code || data.airline || document.getElementById('airline_code').value;
-      let flightNo = data.flight_no || data.flight_number;
-      if (!flightNo) {
-        flightNo = airlineCode + document.getElementById('flight_num').value;
-      }
-      document.getElementById('disp_flight_no').innerText = flightNo;
+      document.getElementById('disp_flight_no').innerText = data.flight_no || '';
+      document.getElementById('disp_departure_time').innerText = data.departure_time || '';
+      document.getElementById('disp_boarding_time').innerText = data.boarding_time || '';
 
-      const depTime = data.departure_time || data.std || data.scheduled_time || document.getElementById('departure_time').value;
-      const boardTime = data.boarding_time || data.etd || document.getElementById('boarding_time').value;
-      document.getElementById('disp_departure_time').innerText = depTime;
-      document.getElementById('disp_boarding_time').innerText = boardTime;
+      document.getElementById('disp_weather_icon').innerText = data.weather_icon || '';
+      document.getElementById('disp_weather_temp').innerText = data.weather_temp || '';
+      document.getElementById('disp_weather_date').innerText = data.weather_date || '';
 
-      document.getElementById('disp_weather_icon').innerText = data.weather_icon !== undefined ? data.weather_icon : document.getElementById('weather_icon').value;
-      document.getElementById('disp_weather_temp').innerText = data.weather_temp !== undefined ? data.weather_temp : document.getElementById('weather_temp').value;
-      document.getElementById('disp_weather_date').innerText = data.weather_date !== undefined ? data.weather_date : document.getElementById('weather_date').value;
-
+      const airlineCode = data.airline_code || "ANA";
       setLogoImage(document.getElementById('disp_logo'), airlineCode);
       setLogoImage(document.getElementById('disp_standby_logo'), airlineCode);
     }
@@ -884,9 +783,7 @@
       try {
         const res = await fetch('/api/flight-data');
         const data = await res.json();
-        const flightData = data.data || data;
-        updateFormInputs(flightData);
-        renderData(flightData);
+        renderData(data);
       } catch (e) {
         console.error('初期データ取得エラー:', e);
       }
