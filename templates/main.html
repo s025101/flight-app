@@ -9,21 +9,20 @@ fr_api = FlightRadar24API()
 
 @app.route('/')
 def index():
-    # パスの問題を完全に回避するため、ファイルを直接探して読み込む
+    # app.pyの存在するディレクトリを絶対パスで取得
     base_dir = os.path.dirname(os.path.abspath(__file__))
     
-    # 1. templates/main.html を探す
-    template_path = os.path.join(base_dir, 'templates', 'main.html')
+    # templates/main.html と ルート直下の main.html の両方を検索
+    path1 = os.path.join(base_dir, 'templates', 'main.html')
+    path2 = os.path.join(base_dir, 'main.html')
     
-    # 2. なければルート直下の main.html を探す
-    if not os.path.exists(template_path):
-        template_path = os.path.join(base_dir, 'main.html')
-        
-    if os.path.exists(template_path):
-        with open(template_path, 'r', encoding='utf-8') as f:
+    target_path = path1 if os.path.exists(path1) else path2
+    
+    if os.path.exists(target_path):
+        with open(target_path, 'r', encoding='utf-8') as f:
             return f.read()
     else:
-        return f"ファイルが見つかりません。探したパス: {template_path}", 404
+        return f"ファイルが見つかりません: {target_path}", 404
 
 @app.route('/api/fetch-live-flight', methods=['POST'])
 def fetch_live_flight():
@@ -87,7 +86,7 @@ def fetch_live_flight():
         airport_dest = matched_flight.get('airport', {}) if isinstance(matched_flight.get('airport'), dict) else {}
         dest_info = airport_dest.get('destination', {}) if isinstance(airport_dest.get('destination'), dict) else {}
         dest_name = dest_info.get('name', '大阪/伊丹')
-        dest_code_info = dest_info.get('code', {}) if isinstance(dest_info.get('code'), dict) else {}
+        dest_code_info = dest_info.get('code', {}) if isinstance(dest_code_info, dict) else {}
         dest_code = dest_code_info.get('iata', 'ITM')
 
         time_details = matched_flight.get('time', {}) if isinstance(matched_flight.get('time'), dict) else {}
