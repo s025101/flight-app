@@ -58,21 +58,19 @@ def get_weather():
 
 @app.route("/api/fetch-live-flight", methods=["POST"])
 def fetch_live_flight():
-    """リアルタイム情報取得（通信遮断・サーバーダウン回避対策済）"""
+    """空港コードとゲート番号をキーにしてリアルタイム情報を取得"""
     global current_flight_data
     req_data = request.json or {}
     
     airport_code = str(req_data.get("airport_code") or req_data.get("airport") or "HND").strip().upper()
     target_gate = str(req_data.get("gate_number") or req_data.get("gate") or "5").strip().upper()
 
-    # APIライブラリのチェック
     if not has_fr24 or fr_api is None:
         return jsonify({
             "status": "error",
             "message": "FlightRadar24ライブラリが利用できません。"
-        }), 200  # 500を出さずに200でエラー内容を返す
+        }), 200
 
-    # 最外殻で通信エラー（Cloudflareブロック等）を完全にキャッチする
     try:
         details = fr_api.get_airport_details(airport_code)
         
@@ -89,7 +87,7 @@ def fetch_live_flight():
 
         matched_flight = None
 
-        # 指定ゲートの便を探索
+        # 1. 指定ゲートの便を探す
         for item in departures:
             if not isinstance(item, dict):
                 continue
@@ -103,7 +101,7 @@ def fetch_live_flight():
                 matched_flight = flight_info
                 break
 
-        # 見つからない場合は出発先頭便をフォールバック
+        # 2. 見つからない場合は出発予定の先頭便をフォールバック
         if not matched_flight and departures:
             first_item = departures[0]
             if isinstance(first_item, dict):
@@ -166,11 +164,10 @@ def fetch_live_flight():
             }), 200
 
     except Exception as e:
-        # 通信拒否やスクレイピングブロックが発生しても、アプリを落とさず安全にレスポンスする
         print(f"FR24 Fetch Error: {e}")
         return jsonify({
             "status": "error",
-            "message": f"FlightRadar24への接続がブロックされました（手動設定をご利用ください）: {str(e)}"
+            "message": f"リアルタイム情報の取得に失敗しました: {str(e)}"
         }), 200
 
 if __name__ == "__main__":
