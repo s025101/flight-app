@@ -2,14 +2,17 @@ import os
 import datetime
 from flask import Flask, request, jsonify, render_template
 
+# 1. ここに FlightRadar24API のインポートを追加！
+from FlightRadar24 import FlightRadar24API
+
 # main.html がルートディレクトリにあっても読み込めるように設定
 app = Flask(__name__, template_folder='.')
 
+# 2. インポートされたのでここで定義しても NameError になりません
 fr_api = FlightRadar24API()
 
 @app.route('/')
 def index():
-    # 明示的に main.html を読み込み
     return render_template('main.html')
 
 @app.route('/api/fetch-live-flight', methods=['POST'])
