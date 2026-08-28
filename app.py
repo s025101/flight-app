@@ -1,259 +1,85 @@
-from flask import Flask, render_template, jsonify, request
-import requests
-from datetime import datetime
+import os
+from flask import Flask, jsonify, render_template_string
 from FlightRadar24 import FlightRadar24API
 
-app = Flask(__name__, static_folder='web', static_url_path='/web')
-
-# FlightRadar24 API クライアントの初期化
+app = Flask(__name__)
 fr_api = FlightRadar24API()
 
-# 日本全国の主要・地方空港マッピング（天気取得用）
-AIRPORT_COORDS = {
-    # 北海道
-    "新千歳": {"lat": 42.7752, "lon": 141.6923},
-    "函館": {"lat": 41.7700, "lon": 140.8219},
-    "旭川": {"lat": 43.6708, "lon": 142.4475},
-    "釧路": {"lat": 43.0411, "lon": 144.1931},
-    "帯広": {"lat": 42.7333, "lon": 143.2172},
-    "女満別": {"lat": 43.8806, "lon": 144.1642},
-    "稚内": {"lat": 45.4039, "lon": 141.8006},
-    "中標津": {"lat": 43.5775, "lon": 144.9603},
-    "紋別": {"lat": 44.3042, "lon": 143.4042},
-    "奥尻": {"lat": 42.0719, "lon": 139.4328},
-    "利尻": {"lat": 45.2422, "lon": 141.1858},
-    "札幌丘珠": {"lat": 43.1161, "lon": 141.3800},
+# HTMLテンプレート（簡単な動作確認用UI）
+HTML_TEMPLATE = """
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlightRadar24 Monitor</title>
+    <style>
+        body { font-family: sans-serif; margin: 2rem; background: #f4f4f9; color: #333; }
+        h1 { color: #0056b3; }
+        .card { background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        ul { line-height: 1.8; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>✈️ 航空会社リスト (FlightRadar24)</h1>
+        <p>FlightRadar24 API との連携が正常に動作しています。</p>
+        <p><a href="/api/airlines">APIエンドポイント (/api/airlines) を確認する</a></p>
+    </div>
+</body>
+</html>
+"""
 
-    # 東北
-    "青森": {"lat": 40.7347, "lon": 140.6906},
-    "三沢": {"lat": 40.7033, "lon": 141.3683},
-    "花巻": {"lat": 39.4308, "lon": 141.1356},
-    "仙台": {"lat": 38.1397, "lon": 140.9169},
-    "秋田": {"lat": 39.6156, "lon": 140.2186},
-    "大館能代": {"lat": 40.1919, "lon": 140.3708},
-    "山形": {"lat": 38.4119, "lon": 140.3711},
-    "庄内": {"lat": 38.8122, "lon": 139.7878},
-    "福島": {"lat": 37.2272, "lon": 140.4319},
-
-    # 関東・甲信越
-    "羽田": {"lat": 35.5494, "lon": 139.7798},
-    "成田": {"lat": 35.7647, "lon": 140.3863},
-    "茨城": {"lat": 36.1808, "lon": 140.4144},
-    "大島": {"lat": 34.7822, "lon": 139.3603},
-    "八丈島": {"lat": 33.1147, "lon": 139.7858},
-    "三宅島": {"lat": 34.0736, "lon": 139.5603},
-    "調布": {"lat": 35.6717, "lon": 139.5281},
-    "新潟": {"lat": 37.9558, "lon": 139.1214},
-    "松本": {"lat": 36.1667, "lon": 137.9228},
-
-    # 中部・北陸
-    "中部": {"lat": 34.8583, "lon": 136.8053},
-    "小牧": {"lat": 35.2550, "lon": 136.9244},
-    "富士山静岡": {"lat": 34.7961, "lon": 138.1894},
-    "富山": {"lat": 36.6483, "lon": 137.1875},
-    "小松": {"lat": 36.3947, "lon": 136.4075},
-    "能登": {"lat": 37.2931, "lon": 136.9603},
-    "福井": {"lat": 36.1417, "lon": 136.2242},
-
-    # 近畿
-    "伊丹": {"lat": 34.7855, "lon": 135.4382},
-    "関西": {"lat": 34.4320, "lon": 135.2304},
-    "神戸": {"lat": 34.6328, "lon": 135.2239},
-    "南紀白浜": {"lat": 33.6622, "lon": 135.3622},
-    "但馬": {"lat": 35.5136, "lon": 134.7869},
-
-    # 中国・四国
-    "鳥取": {"lat": 35.5300, "lon": 134.1664},
-    "米子": {"lat": 35.4922, "lon": 133.2364},
-    "出雲": {"lat": 35.4136, "lon": 132.8894},
-    "石見": {"lat": 34.6764, "lon": 131.7900},
-    "隠岐": {"lat": 36.1811, "lon": 133.3333},
-    "岡山": {"lat": 34.7569, "lon": 133.8553},
-    "広島": {"lat": 34.4361, "lon": 132.9194},
-    "岩国": {"lat": 34.1439, "lon": 132.2361},
-    "山口宇部": {"lat": 33.9300, "lon": 131.2489},
-    "徳島": {"lat": 34.1328, "lon": 134.6067},
-    "高松": {"lat": 34.2142, "lon": 134.0156},
-    "松山": {"lat": 33.8272, "lon": 132.7000},
-    "高知": {"lat": 33.5461, "lon": 133.6694},
-
-    # 九州・沖縄
-    "福岡": {"lat": 33.5859, "lon": 130.4507},
-    "北九州": {"lat": 33.8456, "lon": 131.0347},
-    "佐賀": {"lat": 33.1497, "lon": 130.3022},
-    "長崎": {"lat": 32.9169, "lon": 129.9136},
-    "壱岐": {"lat": 33.7489, "lon": 129.7850},
-    "対馬": {"lat": 34.2881, "lon": 129.3308},
-    "五島福江": {"lat": 32.6664, "lon": 128.8328},
-    "熊本": {"lat": 32.8372, "lon": 130.8553},
-    "天草": {"lat": 32.4819, "lon": 130.1586},
-    "大分": {"lat": 33.4794, "lon": 131.7372},
-    "宮崎": {"lat": 31.8772, "lon": 131.4486},
-    "鹿児島": {"lat": 31.8033, "lon": 130.7194},
-    "奄美": {"lat": 28.4306, "lon": 129.7125},
-    "屋久島": {"lat": 30.3853, "lon": 130.6592},
-    "種子島": {"lat": 30.6094, "lon": 130.9583},
-    "喜界": {"lat": 28.3211, "lon": 129.9281},
-    "徳之島": {"lat": 27.8364, "lon": 128.8814},
-    "沖永良部": {"lat": 27.4256, "lon": 128.7008},
-    "与論": {"lat": 27.0439, "lon": 128.4011},
-    "那覇": {"lat": 26.1958, "lon": 127.6458},
-    "宮古": {"lat": 24.7828, "lon": 125.2950},
-    "下地島": {"lat": 24.8267, "lon": 125.1447},
-    "新石垣": {"lat": 24.3964, "lon": 124.2450},
-    "久米島": {"lat": 26.3636, "lon": 126.7136},
-    "与那国": {"lat": 24.4672, "lon": 122.9772},
-    "多良間": {"lat": 24.6539, "lon": 124.6775},
-    "南大東": {"lat": 25.8467, "lon": 131.2636},
-    "北大東": {"lat": 25.9464, "lon": 131.3286},
-    "慶良間": {"lat": 26.1683, "lon": 127.2931},
-    "粟国": {"lat": 26.5928, "lon": 127.2386}
-}
-
-# 目的地名から座標マッピングキーおよび英語表示への辞書
-DEST_INFO_MAP = {
-    "ITM": {"ja": "伊丹", "en": "OSAKA/ITAMI"},
-    "KIX": {"ja": "関西", "en": "OSAKA/KANSAI"},
-    "HND": {"ja": "羽田", "en": "TOKYO/HANEDA"},
-    "NRT": {"ja": "成田", "en": "TOKYO/NARITA"},
-    "FUK": {"ja": "福岡", "en": "FUKUOKA"},
-    "CTS": {"ja": "新千歳", "en": "NEW CHITOSE"},
-    "NGO": {"ja": "中部", "en": "NAGOYA/CENTRAIR"},
-    "OKA": {"ja": "那覇", "en": "OKINAWA/NAHA"},
-}
-
-# WMO天気コードを絵文字に変換する辞書
-WEATHER_ICONS = {
-    0: "☀️",          # 快晴
-    1: "🌤️",          # ほぼ晴れ
-    2: "⛅",          # 一部曇り
-    3: "☁️",          # 曇り
-    45: "🌫️", 48: "🌫️", # 霧
-    51: "🌧️", 53: "🌧️", 55: "🌧️", # しとしと雨
-    61: "☔", 63: "☔", 65: "☔", # 雨
-    71: "❄️", 73: "❄️", 75: "❄️", # 雪
-    80: "🌦️", 81: "🌦️", 82: "🌦️", # 俄か雨
-    95: "⚡", 96: "⚡", 99: "⚡"  # 雷雨
-}
-
-# 初期データの保持
-flight_data = {
-    "gate": "5",
-    "title_ja": "搭乗ご案内",
-    "title_en": "BOARDING INFORMATION",
-    "destination_ja": "伊丹",
-    "destination_en": "OSAKA/ITAMI",
-    "airline_code": "ANA",
-    "flight_no": "ANA420",
-    "departure_time": "07:10",
-    "boarding_time": "06:50",
-    "weather_icon": "☀️",
-    "weather_temp": "21°C",
-    "weather_date": datetime.now().strftime("%m月%d日")
-}
-
-def fetch_weather_internal(dest_ja):
-    coords = AIRPORT_COORDS.get(dest_ja, AIRPORT_COORDS["伊丹"])
-    try:
-        url = f"https://api.open-meteo.com/v1/forecast?latitude={coords['lat']}&longitude={coords['lon']}&current_weather=true"
-        response = requests.get(url, timeout=5)
-        data = response.json()
-        if "current_weather" in data:
-            current = data["current_weather"]
-            temp = f"{round(current['temperature'])}°C"
-            weather_code = current.get("weathercode", 0)
-            icon = WEATHER_ICONS.get(weather_code, "☀️")
-            return icon, temp
-    except Exception as e:
-        print("天気API取得エラー:", e)
-    return "☀️", "--°C"
-
-@app.route('/')
+@app.route("/")
 def index():
-    return render_template('main.html')
+    """トップページ"""
+    return render_template_string(HTML_TEMPLATE)
 
-@app.route('/api/flight-data', methods=['GET'])
-def get_flight_data():
-    return jsonify(flight_data)
-
-@app.route('/api/update-flight-data', methods=['POST'])
-def update_flight_data():
-    global flight_data
-    req_data = request.get_json()
-    if req_data:
-        flight_data.update(req_data)
-    return jsonify(flight_data)
-
-@app.route('/api/weather', methods=['GET'])
-def get_weather():
-    dest = request.args.get('destination', '伊丹')
-    icon, temp = fetch_weather_internal(dest)
-    return jsonify({"icon": icon, "temp": temp})
-
-@app.route('/api/fetch-live-flight', methods=['POST'])
-def fetch_live_flight():
-    global flight_data
-    req_data = request.get_json() or {}
-    airport_code = req_data.get('airport_code', 'HND')
-    gate_number = str(req_data.get('gate_number', '5')).strip()
-
+@app.route("/api/airlines")
+def get_airlines():
+    """航空会社一覧を取得するAPIエンドポイント"""
     try:
-        # 空港の詳細スケジュールを取得
-        details = fr_api.get_airport_details(airport_code)
-        plugin_data = details.get('pluginData', {})
-        schedule = plugin_data.get('schedule', {})
-        departures = schedule.get('departures', {}).get('data', [])
-
-        target_flight = None
-        for item in departures:
-            f = item.get('flight', {})
-            gate = str(f.get('airport', {}).get('origin', {}).get('info', {}).get('gate', '') or '').strip()
-            # ゲート番号の照合（大文字小文字無視・前方一致なども考慮）
-            if gate and (gate.lower() == gate_number.lower()):
-                target_flight = f
-                break
-
-        if not target_flight and departures:
-            # ゲートが一致しない場合は最新の出発予定便を取得（フォールバック）
-            target_flight = departures[0].get('flight', {})
-
-        if target_flight:
-            airline_code = target_flight.get('airline', {}).get('code', {}).get('icao', 'ANA')
-            flight_num = target_flight.get('identification', {}).get('number', {}).get('default', '')
-            
-            dest_iata = target_flight.get('airport', {}).get('destination', {}).get('code', {}).get('iata', '')
-            dest_info = DEST_INFO_MAP.get(dest_iata, {"ja": "伊丹", "en": "OSAKA/ITAMI"})
-
-            std_timestamp = target_flight.get('time', {}).get('scheduled', {}).get('departure')
-            if std_timestamp:
-                departure_time = datetime.fromtimestamp(std_timestamp).strftime('%H:%M')
-            else:
-                departure_time = "00:00"
-
-            icon, temp = fetch_weather_internal(dest_info["ja"])
-
-            updated_data = {
-                "gate": gate_number,
-                "title_ja": "搭乗ご案内",
-                "title_en": "BOARDING INFORMATION",
-                "destination_ja": dest_info["ja"],
-                "destination_en": dest_info["en"],
-                "airline_code": airline_code,
-                "flight_no": flight_num or f"{airline_code}123",
-                "departure_time": departure_time,
-                "boarding_time": departure_time,
-                "weather_icon": icon,
-                "weather_temp": temp,
-                "weather_date": datetime.now().strftime("%m月%d日")
-            }
-            flight_data.update(updated_data)
-            return jsonify({"status": "success", "data": flight_data})
-        else:
-            return jsonify({"status": "error", "message": "指定されたゲートの便が見つかりませんでした"})
-
+        airlines = fr_api.get_airlines()
+        # 上位20件のみ返す例
+        return jsonify({
+            "status": "success",
+            "count": len(airlines),
+            "data": airlines[:20]
+        })
     except Exception as e:
-        print("FlightRadar24 API取得エラー:", e)
-        return jsonify({"status": "error", "message": f"ライブデータ取得失敗: {str(e)}"})
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+@app.route("/api/flights")
+def get_flights():
+    """現在飛行中のフライト情報を取得する例"""
+    try:
+        flights = fr_api.get_flights()
+        # 最初の10件の簡易情報を抽出
+        flight_data = []
+        for f in flights[:10]:
+            flight_data.append({
+                "id": f.id,
+                "callsign": f.callsign,
+                "latitude": f.latitude,
+                "longitude": f.longitude,
+                "altitude": f.altitude,
+                "ground_speed": f.ground_speed
+            })
+        return jsonify({
+            "status": "success",
+            "count": len(flights),
+            "sample": flight_data
+        })
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
+
+if __name__ == "__main__":
+    # ローカル開発用
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=True)
