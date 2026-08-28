@@ -3,14 +3,14 @@ import datetime
 from flask import Flask, request, jsonify, render_template
 from FlightRadar24 import FlightRadar24API
 
-# template_folder='.' を削除し、デフォルトの templates フォルダを見に行くように変更
+# 標準の templates/main.html を読み込む設定
 app = Flask(__name__)
 
 fr_api = FlightRadar24API()
 
 @app.route('/')
 def index():
-    # templates/main.html を正しく読み込みます
+    # 余計なエラーハンドリングを外し、正しく main.html をレンダリング
     return render_template('main.html')
 
 @app.route('/api/fetch-live-flight', methods=['POST'])
@@ -75,7 +75,7 @@ def fetch_live_flight():
         airport_dest = matched_flight.get('airport', {}) if isinstance(matched_flight.get('airport'), dict) else {}
         dest_info = airport_dest.get('destination', {}) if isinstance(airport_dest.get('destination'), dict) else {}
         dest_name = dest_info.get('name', '大阪/伊丹')
-        dest_code_info = dest_info.get('code', {}) if isinstance(dest_info.get('code'), dict) else {}
+        dest_code_info = dest_info.get('code', {}) if isinstance(dest_code_info, dict) else {}
         dest_code = dest_code_info.get('iata', 'ITM')
 
         time_details = matched_flight.get('time', {}) if isinstance(matched_flight.get('time'), dict) else {}
