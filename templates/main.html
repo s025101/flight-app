@@ -362,10 +362,10 @@
     <h3>コントロールパネル</h3>
     
     <button type="button" class="btn-mode" id="btnToggleMode" onclick="toggleStandbyMode()">
-      📺 準備中画面（ロゴ表示）に切り替え
+      準備中画面（ロゴ表示）に切り替え
     </button>
 
-    <div class="section-title">✏️ 表示設定・調整</div>
+    <div class="section-title">表示設定・調整</div>
     <form id="adminForm">
       
       <div class="row">
@@ -388,7 +388,7 @@
       </div>
 
       <div class="form-group">
-        <label>行き先空港</label>
+        <label>行先空港</label>
         <select id="destination" onchange="onDestinationChange()">
           <optgroup label="北海道">
             <option value="新千歳" data-en="NEW CHITOSE" data-lat="42.775" data-lon="141.692">新千歳 (CTS)</option>
@@ -481,7 +481,7 @@
         </select>
       </div>
 
-      <div class="section-title">✈️ 運航会社・便名 (メイン)</div>
+      <div class="section-title">航空会社・便名 (運航会社)</div>
       <div class="row">
         <div class="form-group">
           <label>航空会社</label>
@@ -511,7 +511,7 @@
         </div>
       </div>
 
-      <div class="section-title">🤝 コードシェア便 (2社目・任意)</div>
+      <div class="section-title">航空会社・便名（コードシェア）</div>
       <div class="row">
         <div class="form-group">
           <label>コードシェア会社</label>
@@ -541,7 +541,7 @@
         </div>
       </div>
 
-      <div class="section-title">⏰ 時刻・遅延設定</div>
+      <div class="section-title">定刻・変更時刻</div>
       <div class="row">
         <div class="form-group">
           <label>定刻</label>
@@ -565,7 +565,7 @@
         </div>
       </div>
       <div class="form-group">
-        <label>下部おしらせメッセージ</label>
+        <label>メッセージ</label>
         <input type="text" id="notice_message" value="">
       </div>
 
