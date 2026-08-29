@@ -601,7 +601,7 @@
       
       <div class="standby-screen hidden" id="standbyScreen">
         <div class="standby-logo-box">
-          <img src="" id="disp_standby_logo" alt="AIRLINE LOGO" onerror="handleImageError(this)">
+          <img src="" id="disp_standby_logo" alt="AIRLINE LOGO">
         </div>
       </div>
 
@@ -688,10 +688,11 @@
       }
     }
 
-    // ローカル読み込みに失敗したらKiwi.comのCDNから自動で取得する設定
+    // ローカル読み込みに失敗したらKiwi.comのCDNから自動で取得（IATA 2レターコードを使用するよう修正）
     function getLogoImgTag(airlineCode) {
+      const iataCode = AIRLINE_PREFIX[airlineCode] || airlineCode;
       const localSrc = `web/logos/${airlineCode}.png`;
-      const fallbackSrc = `https://images.kiwi.com/airlines/64/${airlineCode}.png`;
+      const fallbackSrc = `https://images.kiwi.com/airlines/64/${iataCode}.png`;
       
       return `
         <div class="airline-logo-box">
@@ -824,12 +825,13 @@
         noticeRow.classList.remove('hidden-notice');
       }
 
-      // 準備中画面のロゴもローカル失敗時にKiwi.comにフォールバックできるように設定
+      // 準備中画面のロゴもIATA 2レターコードを使ってKiwi.comから取得できるように修正
+      const mainIata = AIRLINE_PREFIX[mainAirline] || mainAirline;
       const standbyImg = document.getElementById('disp_standby_logo');
       standbyImg.src = `web/logos/${mainAirline}.png`;
       standbyImg.onerror = function() {
         this.onerror = null;
-        this.src = `https://images.kiwi.com/airlines/64/${mainAirline}.png`;
+        this.src = `https://images.kiwi.com/airlines/64/${mainIata}.png`;
       };
     }
 
