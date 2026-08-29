@@ -203,7 +203,6 @@
     .title-text-ja { font-size: 2.5rem; font-weight: 900; letter-spacing: 0.1rem; line-height: 1; color: #ffffff; }
     .title-text-en { font-size: 1.5rem; color: #ffcc00; font-weight: 900; letter-spacing: 0.05rem; line-height: 1; }
 
-    /* 搭乗中・最終案内のときに文字を黄色にするスタイル */
     .title-block.alert-text .title-text-ja,
     .title-block.alert-text .title-text-en {
       color: #ffd700 !important;
@@ -573,8 +572,19 @@
         </div>
       </div>
       <div class="form-group">
-        <label>メッセージ</label>
-        <input type="text" id="notice_message" value="">
+        <label>メッセージ（選択または手入力）</label>
+        <input type="text" id="notice_message" list="notice_suggestions" value="" placeholder="選択または直接入力...">
+        <datalist id="notice_suggestions">
+          <option value="おくれ（使用機材到着おくれのため）">
+          <option value="おくれ（天候不良のため）">
+          <option value="おくれ（機材調整のため）">
+          <option value="おくれ（整備作業のため）">
+          <option value="ただいま優先搭乗を実施しております">
+          <option value="搭乗口が変更になっておりますのでご注意ください">
+          <option value="天候不良のため、条件付きで運航しております">
+          <option value="天候調査中">
+          <option value="引き返しまたは出発地への戻りの可能性がございます">
+        </datalist>
       </div>
 
       <button type="button" class="btn-primary" onclick="sendUpdate()">設定を案内に反映</button>
