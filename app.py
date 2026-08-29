@@ -106,34 +106,40 @@ AIRPORT_COORDS = {
     "粟国": {"lat": 26.5928, "lon": 127.2386}
 }
 
-# WMO天気コードを絵文字に変換する辞書
 WEATHER_ICONS = {
-    0: "☀️",          # 快晴
-    1: "🌤️",          # ほぼ晴れ
-    2: "⛅",          # 一部曇り
-    3: "☁️",          # 曇り
-    45: "🌫️", 48: "🌫️", # 霧
-    51: "🌧️", 53: "🌧️", 55: "🌧️", # しとしと雨
-    61: "☔", 63: "☔", 65: "☔", # 雨
-    71: "❄️", 73: "❄️", 75: "❄️", # 雪
-    80: "🌦️", 81: "🌦️", 82: "🌦️", # 俄か雨
-    95: "⚡", 96: "⚡", 99: "⚡"  # 雷雨
+    0: "☀️", 1: "🌤️", 2: "⛅", 3: "☁️",
+    45: "🌫️", 48: "🌫️",
+    51: "🌧️", 53: "🌧️", 55: "🌧️",
+    61: "☔", 63: "☔", 65: "☔",
+    71: "❄️", 73: "❄️", 75: "❄️",
+    80: "🌦️", 81: "🌦️", 82: "🌦️",
+    95: "⚡", 96: "⚡", 99: "⚡"
 }
 
-# 初期データの保持
+# 初期データの拡張（コードシェアや変更時刻・お知らせ対応）
 flight_data = {
-    "gate": "5",
-    "title_ja": "搭乗ご案内",
-    "title_en": "BOARDING INFORMATION",
-    "destination_ja": "伊丹",
-    "destination_en": "OSAKA/ITAMI",
-    "airline_code": "ANA",
-    "flight_no": "ANA420",
-    "departure_time": "07:10",
-    "boarding_time": "06:50",
+    "gate": "82",
+    "title_ja": "搭乗中",
+    "title_en": "NOW BOARDING",
+    "destination_ja": "福江",
+    "destination_en": "GOTO FUKUE",
+    # メイン運航便
+    "airline_code": "ORC",
+    "flight_no": "ORC97",
+    # コードシェア便（2社目）
+    "co_airline_code": "ANA",
+    "co_flight_no": "ANA4697",
+    # 時刻・遅延関連
+    "departure_time": "9:35",
+    "changed_time": "9:45",
+    "boarding_time": "9:15",
+    # 天気関連（最高・最低気温）
     "weather_icon": "☀️",
     "weather_temp": "21°C",
-    "weather_date": datetime.now().strftime("%m月%d日")
+    "weather_temp_min": "12°C",
+    "weather_date": datetime.now().strftime("%m月%d日"),
+    # 下部おしらせスクロール
+    "notice_message": "おくれ（使用機到着遅れのため）"
 }
 
 @app.route('/')
@@ -154,11 +160,10 @@ def update_flight_data():
 
 @app.route('/api/weather', methods=['GET'])
 def get_weather():
-    dest = request.args.get('destination', '伊丹')
-    coords = AIRPORT_COORDS.get(dest, AIRPORT_COORDS["伊丹"])
+    dest = request.args.get('destination', '福江')
+    coords = AIRPORT_COORDS.get(dest, AIRPORT_COORDS["福岡"])
     
     try:
-        # Open-Meteo APIからリアルタイム天気を取得
         url = f"https://api.open-meteo.com/v1/forecast?latitude={coords['lat']}&longitude={coords['lon']}&current_weather=true"
         response = requests.get(url, timeout=5)
         data = response.json()
