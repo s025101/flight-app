@@ -178,20 +178,29 @@
       border-bottom: 3px solid #2a2a44;
       transition: background-color 0.3s ease;
     }
-    /* 状態が搭乗中または最終案内のときのヘッダー背景色を黄色に */
+    /* 状態が搭乗中または最終案内のときのヘッダー背景色を黄色に（時計部分は除外） */
     .row-header.alert-bg {
       background-color: #ffcc00 !important;
     }
-    .row-header.alert-bg .title-block,
-    .row-header.alert-bg .clock-block {
+    .row-header.alert-bg .gate-block {
+      /* ゲート部分は必要に応じてそのまま、または連動させる場合 */
+    }
+    .row-header.alert-bg .title-block {
       background-color: #ffcc00 !important;
-      color: #111;
+    }
+    .row-header.alert-bg .title-text-ja {
+      color: #111 !important;
     }
     .row-header.alert-bg .title-text-en {
       color: #b32d00 !important;
     }
+    /* 時計ブロックは元の色のまま（#1b1b2f と白文字）維持 */
+    .row-header.alert-bg .clock-block {
+      background-color: #1b1b2f !important;
+      color: #fff !important;
+    }
     .row-header.alert-bg .clock-time {
-      color: #111;
+      color: #fff !important;
     }
 
     .gate-block {
@@ -328,7 +337,6 @@
       white-space: nowrap;
       transition: all 0.3s ease;
     }
-    /* メッセージが空のときの非表示スタイル */
     .row-notice.hidden-notice {
       height: 0;
       padding: 0 20px;
@@ -726,7 +734,7 @@
       titleJaElem.innerText = titleJa;
       titleEnElem.innerText = titleEn;
 
-      // 「搭乗中」または「最終案内」の場合の点滅と背景色変更の処理
+      // 「搭乗中」または「最終案内」の場合の点滅とヘッダー背景色変更の処理（時計エリアは除外）
       if (titleJa.includes("搭乗中") || titleJa.includes("最終案内")) {
         titleJaElem.classList.add('blink');
         titleEnElem.classList.add('blink');
@@ -787,7 +795,6 @@
       document.getElementById('disp_weather_temp').innerText = data.weather_temp || '';
       document.getElementById('disp_weather_temp_min').innerText = data.weather_temp_min || '';
 
-      // ▼ お知らせメッセージ欄の空欄チェック処理
       const noticeRow = document.getElementById('disp_notice_row');
       const noticeTextElem = document.getElementById('disp_notice');
       const noticeMsg = data.notice_message ? data.notice_message.trim() : '';
