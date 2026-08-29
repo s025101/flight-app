@@ -340,13 +340,13 @@
       <div class="row">
         <div class="form-group">
           <label>ゲート番号</label>
-          <input type="text" id="gate" value="82">
+          <input type="text" id="gate" value="5">
         </div>
         <div class="form-group">
           <label>ステータス</label>
           <select id="title_select">
-            <option value="搭乗中" data-en="NOW BOARDING" selected>搭乗中 (NOW BOARDING)</option>
-            <option value="搭乗ご案内" data-en="BOARDING">搭乗ご案内 (BOARDING)</option>
+            <option value="搭乗中" data-en="NOW BOARDING">搭乗中 (NOW BOARDING)</option>
+            <option value="搭乗ご案内" data-en="BOARDING" selected>搭乗ご案内 (BOARDING)</option>
             <option value="最終案内" data-en="FINAL CALL">最終案内 (FINAL CALL)</option>
             <option value="出発遅延" data-en="DELAYED">出発遅延 (DELAYED)</option>
             <option value="欠航" data-en="CANCELLED">欠航 (CANCELLED)</option>
@@ -360,7 +360,7 @@
         <label>行き先空港</label>
         <select id="destination" onchange="onDestinationChange()">
           <optgroup label="北海道">
-            <option value="新千歳" data-en="NEW CHITOSE" data-lat="42.775" data-lon="141.692" selected>新千歳 (CTS)</option>
+            <option value="新千歳" data-en="NEW CHITOSE" data-lat="42.775" data-lon="141.692">新千歳 (CTS)</option>
             <option value="函館" data-en="HAKODATE">函館 (HKD)</option>
             <option value="旭川" data-en="ASAHIKAWA">旭川 (AKJ)</option>
             <option value="釧路" data-en="KUSHIRO">釧路 (KUH)</option>
@@ -384,7 +384,7 @@
             <option value="福島" data-en="FUKUSHIMA">福島 (FKS)</option>
           </optgroup>
           <optgroup label="関東・甲信越">
-            <option value="羽田" data-en="TOKYO HEDA" data-lat="35.549" data-lon="139.779">羽田 (HND)</option>
+            <option value="羽田" data-en="TOKYO HENEDA" data-lat="35.549" data-lon="139.779" selected>羽田 (HND)</option>
             <option value="成田" data-en="NARITA" data-lat="35.771" data-lon="140.392">成田 (NRT)</option>
             <option value="茨城" data-en="IBARAKI">茨城 (IBR)</option>
             <option value="新潟" data-en="NIIGATA">新潟 (KIJ)</option>
@@ -455,23 +455,23 @@
         <div class="form-group">
           <label>航空会社</label>
           <select id="airline_code">
-            <option value="ANA">ANA (全日本空輸)</option>
-            <option value="JAL">JAL (日本航空)</option>
-            <option value="SKY">SKY (スカイマーク)</option>
-            <option value="ADO">ADO (エア・ドゥ)</option>
-            <option value="SNJ">SNJ (ソラシドエア)</option>
-            <option value="SFJ">SFJ (スターフライヤー)</option>
-            <option value="APJ">APJ (ピーチ)</option>
-            <option value="JJP">JJP (ジェットスター・ジャパン)</option>
-            <option value="SJO">SJO (春秋航空日本)</option>
-            <option value="FDA">FDA (フジドリームエアラインズ)</option>
-            <option value="IBX">IBX (アイベックスエアラインズ)</option>
-            <option value="ORC" selected>ORC (オリエンタルエアブリッジ)</option>
-            <option value="AMX">AMX (天草エアライン)</option>
-            <option value="JTA">JTA (日本トランスオーシャン航空)</option>
-            <option value="RAC">RAC (琉球エアーコミューター)</option>
-            <option value="JAC">JAC (日本エアコミューター)</option>
-            <option value="HAC">HAC (北海道エアシステム)</option>
+            <option value="ANA" selected>>ANA</option>
+            <option value="JAL">JAL</option>
+            <option value="SKY">SKY</option>
+            <option value="ADO">ADO</option>
+            <option value="SNJ">SNJ</option>
+            <option value="SFJ">SFJ</option>
+            <option value="APJ">APJ</option>
+            <option value="JJP">JJP</option>
+            <option value="SJO">SJO</option>
+            <option value="FDA">FDA</option>
+            <option value="IBX">IBX</option>
+            <option value="ORC">ORC </option>
+            <option value="AMX">AMX</option>
+            <option value="JTA">JTA</option>
+            <option value="RAC">RAC</option>
+            <option value="JAC">JAC</option>
+            <option value="HAC">HAC</option>
           </select>
         </div>
         <div class="form-group">
@@ -486,7 +486,7 @@
           <label>コードシェア会社</label>
           <select id="co_airline_code">
             <option value="">なし</option>
-            <option value="ANA" selected>ANA</option>
+            <option value="ANA">ANA</option>
             <option value="JAL">JAL</option>
             <option value="SKY">SKY</option>
             <option value="ADO">ADO</option>
@@ -494,6 +494,7 @@
             <option value="SFJ">SFJ</option>
             <option value="APJ">APJ</option>
             <option value="JJP">JJP</option>
+            <option value="SJO">SJO</option>
             <option value="FDA">FDA</option>
             <option value="IBX">IBX</option>
             <option value="ORC">ORC</option>
@@ -535,7 +536,7 @@
       </div>
       <div class="form-group">
         <label>下部おしらせメッセージ</label>
-        <input type="text" id="notice_message" value="おくれ（使用機到着遅れのため） / Flight delayed due to late inbound aircraft.">
+        <input type="text" id="notice_message" value="">
       </div>
 
       <button type="button" class="btn-primary" onclick="sendUpdate()">設定を案内に反映</button>
