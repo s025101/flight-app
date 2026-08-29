@@ -491,7 +491,7 @@
       <div class="section-title">航空会社・便名 (運航会社)</div>
       <div class="row">
         <div class="form-group">
-          <label>航空会社</label>
+          <label>運航会社</label>
           <select id="airline_code">
             <option value="ANA">ANA (全日本空輸)</option>
             <option value="JAL" selected>JAL (日本航空)</option>
@@ -513,7 +513,7 @@
           </select>
         </div>
         <div class="form-group">
-          <label>便名</label>
+          <label>運航会社便名</label>
           <input type="text" id="flight_no" value="303">
         </div>
       </div>
@@ -560,7 +560,7 @@
         </div>
       </div>
 
-      <div class="section-title">🌤️ 天気・お知らせ</div>
+      <div class="section-title">天気・お知らせ</div>
       <div class="row">
         <div class="form-group">
           <label>最高気温</label>
@@ -589,7 +589,7 @@
         </select>
       </div>
       <div class="form-group">
-        <label>メッセージ（手入力・編集用）</label>
+        <label>メッセージ（入力）</label>
         <input type="text" id="notice_message" value="" placeholder="直接入力もできます">
       </div>
 
@@ -680,11 +680,11 @@
       const btn = document.getElementById('btnToggleMode');
       if (isStandby) {
         standbyScreen.classList.remove('hidden');
-        btn.innerText = "📺 通常の案内板画面に戻す";
+        btn.innerText = "通常画面に戻す";
         btn.style.backgroundColor = "#2563eb";
       } else {
         standbyScreen.classList.add('hidden');
-        btn.innerText = "📺 準備中画面（ロゴ表示）に切り替え";
+        btn.innerText = "準備中画面に切り替え";
         btn.style.backgroundColor = "#d97706";
       }
     }
