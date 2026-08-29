@@ -9,7 +9,6 @@
       margin: 0;
       padding: 0;
       background-color: #111;
-      /* 本物のFIDS（新ゴ・UD新ゴ系）の雰囲気に寄せるため、UD系や視認性の高いゴシック体を優先指定 */
       font-family: 'UD Shin Go', 'Shin Go', 'Hiragino Kaku Gothic ProN', 'Meiryo', 'Helvetica Neue', Arial, sans-serif;
       display: flex;
       height: 100vh;
@@ -177,26 +176,6 @@
       background-color: #1b1b2f;
       display: flex;
       border-bottom: 3px solid #2a2a44;
-      transition: background-color 0.3s ease;
-    }
-    .row-header.alert-bg {
-      background-color: #ffcc00 !important;
-    }
-    .row-header.alert-bg .title-block {
-      background-color: #ffcc00 !important;
-    }
-    .row-header.alert-bg .title-text-ja {
-      color: #111 !important;
-    }
-    .row-header.alert-bg .title-text-en {
-      color: #b32d00 !important;
-    }
-    .row-header.alert-bg .clock-block {
-      background-color: #1b1b2f !important;
-      color: #fff !important;
-    }
-    .row-header.alert-bg .clock-time {
-      color: #fff !important;
     }
 
     .gate-block {
@@ -220,10 +199,15 @@
       gap: 15px;
       background-color: #1b1b2f;
       padding: 0 15px;
-      transition: background-color 0.3s ease, color 0.3s ease;
     }
-    .title-text-ja { font-size: 2.5rem; font-weight: 900; letter-spacing: 0.1rem; line-height: 1; }
+    .title-text-ja { font-size: 2.5rem; font-weight: 900; letter-spacing: 0.1rem; line-height: 1; color: #ffffff; }
     .title-text-en { font-size: 1.5rem; color: #ffcc00; font-weight: 900; letter-spacing: 0.05rem; line-height: 1; }
+
+    /* 搭乗中・最終案内のときに文字を黄色にするスタイル */
+    .title-block.alert-text .title-text-ja,
+    .title-block.alert-text .title-text-en {
+      color: #ffd700 !important;
+    }
 
     .clock-block {
       width: 20%;
@@ -232,11 +216,10 @@
       justify-content: center;
       align-items: center;
       border-left: 3px solid #2a2a44;
-      transition: background-color 0.3s ease, color 0.3s ease;
     }
     .clock-time { font-size: 3.0rem; font-weight: bold; font-family: 'Courier New', Courier, monospace; }
 
-    /* メイン領域 (行先、コードシェア便情報、天気) */
+    /* メイン領域 */
     .row-main {
       flex-grow: 1;
       display: flex;
@@ -249,10 +232,9 @@
       flex-direction: column;
       justify-content: center;
       gap: 15px;
-      min-width: 0; /* 子要素のはみ出し・意図せぬ折り返しを防ぐために必要 */
+      min-width: 0;
     }
     
-    /* 行先コンテナ：折り返しを禁止し1行に収める修正 */
     .destination-container { 
       display: flex; 
       align-items: baseline; 
@@ -277,7 +259,6 @@
       text-overflow: ellipsis; 
     }
 
-    /* コードシェアを並べるコンテナ */
     .flights-container {
       display: flex;
       align-items: center;
@@ -305,7 +286,6 @@
     }
     .flight-number { font-size: 3.2rem; font-weight: 900; line-height: 1; letter-spacing: 0.05em; }
 
-    /* 右側：天気ブロック */
     .main-right {
       width: 220px;
       border-left: 2px solid #2a2a44;
@@ -320,7 +300,6 @@
     .weather-temps { font-size: 1.6rem; font-weight: bold; margin-top: 8px; color: #fff; text-align: center; }
     .weather-temps span.min { color: #8ab4f8; font-size: 1.3rem; }
 
-    /* 下部：時刻・遅延情報エリア */
     .row-time {
       height: 22%;
       background-color: #161628;
@@ -342,7 +321,6 @@
     .time-changed-label { font-size: 0.9rem; background-color: #d97706; color: white; padding: 2px 6px; border-radius: 3px; font-weight: bold; }
     .time-changed-value { font-size: 3.5rem; font-weight: 900; color: #ffcc00; }
 
-    /* 最下部：おしらせスクロール帯 */
     .row-notice {
       height: 15%;
       background-color: #ffd700;
@@ -372,7 +350,6 @@
     }
     .blink { animation: blinkAnimation 1.0s infinite; }
 
-    /* --- レスポンシブ調整（iPhone・iPad miniなどの狭い画面用） --- */
     @media screen and (max-width: 768px) {
       .destination-text-ja {
         font-size: 3.2rem;
@@ -385,12 +362,10 @@
 </head>
 <body>
 
-  <!-- パネル開閉ボタン -->
   <button type="button" class="toggle-panel-btn" id="btnTogglePanel" onclick="toggleAdminPanel()">
     ◀ パネルを閉じる
   </button>
 
-  <!-- 左側: コントロールパネル -->
   <div class="admin-panel" id="adminPanel">
     <h3>コントロールパネル</h3>
     
@@ -409,9 +384,9 @@
         <div class="form-group">
           <label>ステータス</label>
           <select id="title_select">
-            <option value="搭乗ご案内" data-en="BOARDING" selected>搭乗ご案内 (BOARDING)</option>
+            <option value="搭乗ご案内" data-en="BOARDING">搭乗ご案内 (BOARDING)</option>
             <option value="まもなく搭乗" data-en="GATE OPEN SOON">まもなく搭乗 (GATE OPEN SOON)</option>
-            <option value="搭乗中" data-en="NOW BOARDING">搭乗中 (NOW BOARDING)</option>
+            <option value="搭乗中" data-en="NOW BOARDING" selected>搭乗中 (NOW BOARDING)</option>
             <option value="最終案内" data-en="FINAL CALL">最終案内 (FINAL CALL)</option>
             <option value="出発遅延" data-en="DELAYED">出発遅延 (DELAYED)</option>
             <option value="欠航" data-en="CANCELLED">欠航 (CANCELLED)</option>
@@ -606,18 +581,15 @@
     </form>
   </div>
 
-  <!-- 右側: 案内板表示部 -->
   <div class="display-panel">
     <div class="fids-board">
       
-      <!-- 準備中画面 -->
       <div class="standby-screen hidden" id="standbyScreen">
         <div class="standby-logo-box">
           <img src="" id="disp_standby_logo" alt="AIRLINE LOGO" onerror="handleImageError(this)">
         </div>
       </div>
 
-      <!-- ヘッダー -->
       <div class="row-header" id="disp_header_row">
         <div class="gate-block">
           <span class="gate-label">GATE</span>
@@ -630,14 +602,12 @@
         <div class="clock-block"><span class="clock-time" id="disp_clock">00:00</span></div>
       </div>
 
-      <!-- メイン (行き先・便名・天気) -->
       <div class="row-main">
         <div class="main-left">
           <div class="destination-container">
             <span class="destination-text-ja" id="disp_dest_ja">-</span>
             <span class="destination-text-en" id="disp_dest_en">-</span>
           </div>
-          <!-- コードシェア表示エリア -->
           <div class="flights-container" id="disp_flights_container"></div>
         </div>
 
@@ -650,7 +620,6 @@
         </div>
       </div>
 
-      <!-- 時間・変更時刻表示エリア -->
       <div class="row-time">
         <div class="time-display-box" id="disp_time_container">
           <span class="time-label">定刻</span>
@@ -658,7 +627,6 @@
         </div>
       </div>
 
-      <!-- 最下部おしらせスクロール -->
       <div class="row-notice" id="disp_notice_row">
         <div class="notice-text" id="disp_notice"></div>
       </div>
@@ -757,7 +725,7 @@
       const titleEn = data.title_en || '';
       const titleJaElem = document.getElementById('disp_title_ja');
       const titleEnElem = document.getElementById('disp_title_en');
-      const headerRow = document.getElementById('disp_header_row');
+      const titleBlock = document.getElementById('disp_title_block');
       
       titleJaElem.innerText = titleJa;
       titleEnElem.innerText = titleEn;
@@ -765,11 +733,11 @@
       if (titleJa.includes("搭乗中") || titleJa.includes("最終案内")) {
         titleJaElem.classList.add('blink');
         titleEnElem.classList.add('blink');
-        headerRow.classList.add('alert-bg');
+        titleBlock.classList.add('alert-text');
       } else {
         titleJaElem.classList.remove('blink');
         titleEnElem.classList.remove('blink');
-        headerRow.classList.remove('alert-bg');
+        titleBlock.classList.remove('alert-text');
       }
 
       document.getElementById('disp_dest_ja').innerText = data.destination_ja || '';
