@@ -18,7 +18,7 @@
 
     /* --- 左側：管理パネル --- */
     .admin-panel {
-      width: 380px;
+      width: 400px;
       background-color: #f4f5f7;
       color: #333;
       padding: 20px;
@@ -26,9 +26,10 @@
       border-right: 2px solid #333;
       transition: margin-left 0.3s ease;
       flex-shrink: 0;
+      z-index: 20;
     }
     .admin-panel.collapsed {
-      margin-left: -380px;
+      margin-left: -400px;
     }
 
     .toggle-panel-btn {
@@ -101,19 +102,6 @@
       margin-bottom: 15px;
     }
     button.btn-mode:hover { background-color: #b45309; }
-    
-    button.btn-secondary {
-      width: 100%;
-      background-color: #4a5568;
-      color: white;
-      border: none;
-      padding: 6px;
-      font-size: 0.85rem;
-      border-radius: 4px;
-      cursor: pointer;
-      margin-top: 4px;
-    }
-    button.btn-secondary:hover { background-color: #2d3748; }
 
     .section-title {
       font-size: 0.9rem;
@@ -191,7 +179,7 @@
     }
     .gate-block {
       width: 18%;
-      background-color: #24dc62; /* 写真のような鮮やかな緑帯 */
+      background-color: #24dc62;
       color: #111;
       display: flex;
       flex-direction: column;
@@ -205,13 +193,14 @@
     .title-block {
       flex-grow: 1;
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
-      gap: 15px;
       background-color: #1b1b2f;
+      padding: 0 15px;
     }
-    .title-text-ja { font-size: 2.5rem; font-weight: bold; letter-spacing: 0.2rem; }
-    .title-text-en { font-size: 1.2rem; color: #ffcc00; font-weight: bold; display: none; } /* 写真に合わせて非表示か小さく */
+    .title-text-ja { font-size: 2.2rem; font-weight: bold; letter-spacing: 0.1rem; line-height: 1.1; }
+    .title-text-en { font-size: 1.1rem; color: #ffcc00; font-weight: bold; margin-top: 2px; letter-spacing: 0.05rem; }
 
     .clock-block {
       width: 20%;
@@ -239,7 +228,7 @@
     }
     
     .destination-container { display: flex; align-items: baseline; gap: 15px; }
-    .destination-text-ja { font-size: 5.0rem; font-weight: bold; line-height: 1; }
+    .destination-text-ja { font-size: 4.5rem; font-weight: bold; line-height: 1; }
 
     /* コードシェアを並べるコンテナ */
     .flights-container {
@@ -279,9 +268,9 @@
       align-items: center;
       justify-content: center;
     }
-    .weather-icon-box { font-size: 3.8rem; line-height: 1; }
-    .weather-temps { font-size: 1.8rem; font-weight: bold; margin-top: 5px; color: #fff; }
-    .weather-temps span.min { color: #8ab4f8; font-size: 1.4rem; }
+    .weather-icon-box { font-size: 3.5rem; line-height: 1; }
+    .weather-temps { font-size: 1.6rem; font-weight: bold; margin-top: 8px; color: #fff; text-align: center; }
+    .weather-temps span.min { color: #8ab4f8; font-size: 1.3rem; }
 
     /* 下部：時刻・遅延情報エリア */
     .row-time {
@@ -307,7 +296,7 @@
     /* 最下部：おしらせスクロール帯 */
     .row-notice {
       height: 15%;
-      background-color: #ffd700; /* 写真のような黄色い帯 */
+      background-color: #ffd700;
       color: #111;
       font-size: 2.0rem;
       font-weight: bold;
@@ -317,16 +306,14 @@
       overflow: hidden;
       white-space: nowrap;
     }
-    .notice-text {
-      display: inline-block;
-    }
+    .notice-text { display: inline-block; }
 
     @keyframes blinkAnimation {
       0% { opacity: 1; }
       50% { opacity: 0.2; }
       100% { opacity: 1; }
     }
-    .blink { animation: blinkAnimation 1.2s infinite; }
+    .blink { animation: blinkAnimation 1.0s infinite; }
   </style>
 </head>
 <body>
@@ -355,48 +342,168 @@
         <div class="form-group">
           <label>ステータス</label>
           <select id="title_select">
-            <option value="搭乗中" selected>搭乗中 (NOW BOARDING)</option>
-            <option value="搭乗ご案内">搭乗ご案内 (BOARDING)</option>
-            <option value="最終案内">最終案内 (FINAL CALL)</option>
-            <option value="出発遅延">出発遅延 (DELAYED)</option>
-            <option value="欠航">欠航 (CANCELLED)</option>
+            <option value="搭乗中" data-en="NOW BOARDING" selected>搭乗中 (NOW BOARDING)</option>
+            <option value="搭乗ご案内" data-en="BOARDING">搭乗ご案内 (BOARDING)</option>
+            <option value="最終案内" data-en="FINAL CALL">最終案内 (FINAL CALL)</option>
+            <option value="出発遅延" data-en="DELAYED">出発遅延 (DELAYED)</option>
+            <option value="欠航" data-en="CANCELLED">欠航 (CANCELLED)</option>
+            <option value="まもなく搭乗" data-en="GATE OPEN SOON">まもなく搭乗 (GATE OPEN SOON)</option>
+            <option value="出発済" data-en="DEPARTED">出発済 (DEPARTED)</option>
           </select>
         </div>
       </div>
 
       <div class="form-group">
-        <label>行き先空港名</label>
-        <select id="destination" onchange="autoFetchWeather()">
-          <option value="福江" selected>福江 (GOTO FUKUE)</option>
-          <option value="新千歳">新千歳</option>
-          <option value="羽田">羽田</option>
-          <option value="伊丹">伊丹</option>
-          <option value="福岡">福岡</option>
-          <option value="那覇">那覇</option>
+        <label>行き先空港</label>
+        <select id="destination" onchange="onDestinationChange()">
+          <optgroup label="北海道">
+            <option value="新千歳" data-lat="42.775" data-lon="141.692" selected>新千歳 (CTS)</option>
+            <option value="函館">函館 (HKD)</option>
+            <option value="旭川">旭川 (AKJ)</option>
+            <option value="釧路">釧路 (KUH)</option>
+            <option value="女満別">女満別 (MMB)</option>
+            <option value="帯広">帯広 (OBO)</option>
+            <option value="稚内">稚内 (WKJ)</option>
+            <option value="中標津">中標津 (SHB)</option>
+            <option value="奥尻">奥尻 (OIR)</option>
+            <option value="利尻">利尻 (RIS)</option>
+            <option value="丘珠">丘珠 (OKD)</option>
+          </optgroup>
+          <optgroup label="東北">
+            <option value="青森">青森 (AOJ)</option>
+            <option value="三沢">三沢 (MSJ)</option>
+            <option value="花巻">花巻 (HNA)</option>
+            <option value="仙台" data-lat="38.139" data-lon="140.917">仙台 (SDJ)</option>
+            <option value="山形">山形 (GAJ)</option>
+            <option value="庄内">庄内 (SYO)</option>
+            <option value="秋田">秋田 (AXT)</option>
+            <option value="大館能代">大館能代 (ONJ)</option>
+            <option value="福島">福島 (FKS)</option>
+          </optgroup>
+          <optgroup label="関東・甲信越">
+            <option value="羽田" data-lat="35.549" data-lon="139.779">羽田 (HND)</option>
+            <option value="成田" data-lat="35.771" data-lon="140.392">成田 (NRT)</option>
+            <option value="茨城">茨城 (IBR)</option>
+            <option value="新潟">新潟 (KIJ)</option>
+            <option value="松本">松本 (MMJ)</option>
+            <option value="佐渡">佐渡 (SDS)</option>
+          </optgroup>
+          <optgroup label="中部・北陸">
+            <option value="中部国際" data-lat="34.858" data-lon="136.805">中部（セントレア） (NGO)</option>
+            <option value="小牧（県営名古屋）">県営名古屋（小牧） (NKM)</option>
+            <option value="静岡">静岡 (FSZ)</option>
+            <option value="富山">富山 (TOY)</option>
+            <option value="小松">小松 (KMQ)</option>
+            <option value="能登">能登 (NTQ)</option>
+            <option value="福井">福井 (FKJ)</option>
+          </optgroup>
+          <optgroup label="関西">
+            <option value="伊丹" data-lat="34.785" data-lon="135.438">伊丹 (ITM)</option>
+            <option value="関西国際" data-lat="34.434" data-lon="135.244">関西国際 (KIX)</option>
+            <option value="神戸">神戸 (UKB)</option>
+            <option value="南紀白浜">南紀白浜 (SHM)</option>
+            <option value="コウノトリ但馬">コウノトリ但馬 (TJH)</option>
+          </optgroup>
+          <optgroup label="中国・四国">
+            <option value="広島" data-lat="34.436" data-lon="132.919">広島 (HIJ)</option>
+            <option value="岡山">岡山 (OKJ)</option>
+            <option value="鳥取">鳥取 (TTJ)</option>
+            <option value="米子">米子 (YGJ)</option>
+            <option value="出雲">出雲 (IZO)</option>
+            <option value="山口宇部">山口宇部 (UBJ)</option>
+            <option value="岩国">岩国 (IWK)</option>
+            <option value="萩・石見">萩・石見 (IWJ)</option>
+            <option value="高松">高松 (TAK)</option>
+            <option value="松山" data-lat="33.828" data-lon="132.700">松山 (MYJ)</option>
+            <option value="高知">高知 (KCZ)</option>
+            <option value="徳島">徳島 (TKS)</option>
+          </optgroup>
+          <optgroup label="九州・沖縄">
+            <option value="福岡" data-lat="33.585" data-lon="130.450">福岡 (FUK)</option>
+            <option value="北九州">北九州 (KKJ)</option>
+            <option value="佐賀">佐賀 (HSG)</option>
+            <option value="長崎">長崎 (NGS)</option>
+            <option value="福江" data-lat="32.668" data-lon="128.831">福江 (FUJ)</option>
+            <option value="対馬">対馬 (TSJ)</option>
+            <option value="壱岐">壱岐 (IKI)</option>
+            <option value="熊本">熊本 (KMJ)</option>
+            <option value="大分">大分 (OIT)</option>
+            <option value="宮崎">宮崎 (KMI)</option>
+            <option value="鹿児島">鹿児島 (KOJ)</option>
+            <option value="種子島">種子島 (TGM)</option>
+            <option value="屋久島">屋久島 (KUM)</option>
+            <option value="奄美">奄美 (ASJ)</option>
+            <option value="喜界">喜界 (KKX)</option>
+            <option value="徳之島">徳之島 (TKN)</option>
+            <option value="沖永良部">沖永良部 (OKE)</option>
+            <option value="与論">与論 (RNJ)</option>
+            <option value="那覇" data-lat="26.204" data-lon="127.645">那覇 (OKA)</option>
+            <option value="久米島">久米島 (UEO)</option>
+            <option value="宮古">宮古 (MMY)</option>
+            <option value="下地島">下地島 (SHI)</option>
+            <option value="石垣">石垣 (ISG)</option>
+            <option value="与那国">与那国 (OGN)</option>
+          </optgroup>
         </select>
       </div>
 
       <div class="section-title">✈️ 運航会社・便名 (メイン)</div>
       <div class="row">
         <div class="form-group">
-          <label>航空会社コード</label>
-          <input type="text" id="airline_code" value="ORC">
+          <label>航空会社</label>
+          <select id="airline_code">
+            <option value="ANA" selected>ANA (全日本空輸)</option>
+            <option value="JAL">JAL (日本航空)</option>
+            <option value="SKY">SKY (スカイマーク)</option>
+            <option value="ADO">ADO (エア・ドゥ)</option>
+            <option value="SNJ">SNJ (ソラシドエア)</option>
+            <option value="SFJ">SFJ (スターフライヤー)</option>
+            <option value="APJ">APJ (ピーチ)</option>
+            <option value="JJP">JJP (ジェットスター・ジャパン)</option>
+            <option value="SJO">SJO (春秋航空日本)</option>
+            <option value="FDA">FDA (フジドリームエアラインズ)</option>
+            <option value="IBX">IBX (アイベックスエアラインズ)</option>
+            <option value="ORC" selected>ORC (オリエンタルエアブリッジ)</option>
+            <option value="AMX">AMX (天草エアライン)</option>
+            <option value="JTA">JTA (日本トランスオーシャン航空)</option>
+            <option value="RAC">RAC (琉球エアーコミューター)</option>
+            <option value="JAC">JAC (日本エアコミューター)</option>
+            <option value="HAC">HAC (北海道エアシステム)</option>
+          </select>
         </div>
         <div class="form-group">
-          <label>便名</label>
-          <input type="text" id="flight_no" value="ORC97">
+          <label>便名 (数字のみ入力可)</label>
+          <input type="text" id="flight_no" value="97">
         </div>
       </div>
 
       <div class="section-title">🤝 コードシェア便 (2社目・任意)</div>
       <div class="row">
         <div class="form-group">
-          <label>コードシェア会社コード</label>
-          <input type="text" id="co_airline_code" value="ANA">
+          <label>コードシェア会社</label>
+          <select id="co_airline_code">
+            <option value="">なし</option>
+            <option value="ANA" selected>ANA</option>
+            <option value="JAL">JAL</option>
+            <option value="SKY">SKY</option>
+            <option value="ADO">ADO</option>
+            <option value="SNJ">SNJ</option>
+            <option value="SFJ">SFJ</option>
+            <option value="APJ">APJ</option>
+            <option value="JJP">JJP</option>
+            <option value="FDA">FDA</option>
+            <option value="IBX">IBX</option>
+            <option value="ORC">ORC</option>
+            <option value="AMX">AMX</option>
+            <option value="JTA">JTA</option>
+            <option value="RAC">RAC</option>
+            <option value="JAC">JAC</option>
+            <option value="HAC">HAC</option>
+          </select>
         </div>
         <div class="form-group">
-          <label>コードシェア便名</label>
-          <input type="text" id="co_flight_no" value="ANA4697">
+          <label>コードシェア便名 (数字のみ)</label>
+          <input type="text" id="co_flight_no" value="4697">
         </div>
       </div>
 
@@ -407,29 +514,25 @@
           <input type="text" id="departure_time" value="9:35">
         </div>
         <div class="form-group">
-          <label>変更時刻 (遅延時など)</label>
+          <label>変更時刻</label>
           <input type="text" id="changed_time" value="9:45">
         </div>
-      </div>
-      <div class="form-group">
-        <label>搭乗開始時刻</label>
-        <input type="text" id="boarding_time" value="9:15">
       </div>
 
       <div class="section-title">🌤️ 天気・お知らせ</div>
       <div class="row">
         <div class="form-group">
           <label>最高気温</label>
-          <input type="text" id="weather_temp" value="21°C">
+          <input type="text" id="weather_temp" value="28°C">
         </div>
         <div class="form-group">
           <label>最低気温</label>
-          <input type="text" id="weather_temp_min" value="12°C">
+          <input type="text" id="weather_temp_min" value="21°C">
         </div>
       </div>
       <div class="form-group">
         <label>下部おしらせメッセージ</label>
-        <input type="text" id="notice_message" value="おくれ（使用機到着遅れのため）">
+        <input type="text" id="notice_message" value="おくれ（使用機到着遅れのため） / Flight delayed due to late inbound aircraft.">
       </div>
 
       <button type="button" class="btn-primary" onclick="sendUpdate()">設定を案内に反映</button>
@@ -455,6 +558,7 @@
         </div>
         <div class="title-block" id="disp_title_block">
           <span class="title-text-ja" id="disp_title_ja">搭乗中</span>
+          <span class="title-text-en" id="disp_title_en">NOW BOARDING</span>
         </div>
         <div class="clock-block"><span class="clock-time" id="disp_clock">00:00</span></div>
       </div>
@@ -465,16 +569,15 @@
           <div class="destination-container">
             <span class="destination-text-ja" id="disp_dest_ja">-</span>
           </div>
-          <!-- 2社並びのコードシェア表示エリア -->
-          <div class="flights-container" id="disp_flights_container">
-            <!-- 動的にJSで挿入されます -->
-          </div>
+          <!-- コードシェア表示エリア -->
+          <div class="flights-container" id="disp_flights_container"></div>
         </div>
 
         <div class="main-right">
           <div class="weather-icon-box" id="disp_weather_icon">☀️</div>
           <div class="weather-temps">
-            <span id="disp_weather_temp">21°C</span> │ <span class="min" id="disp_weather_temp_min">12°C</span>
+            <span id="disp_weather_temp">28°C</span><br>
+            <span class="min" id="disp_weather_temp_min">21°C</span>
           </div>
         </div>
       </div>
@@ -499,11 +602,19 @@
   </div>
 
   <script>
-    const IATA_MAP = {
+    // 日本の主要旅客航空会社のプレフィックス定義
+    const AIRLINE_PREFIX = {
       "ANA": "NH", "JAL": "JL", "SKY": "BC", "SFJ": "7G", "ADO": "HD",
-      "SNJ": "6J", "APJ": "MM", "JJP": "GK", "SJO": "IJ", "TZP": "ZG",
-      "AJX": "NQ", "FDA": "JH", "IBX": "FW", "JTA": "NU", "RAC": "RAC",
-      "JAC": "JC", "HAC": "HC", "ORC": "OC", "AMX": "AH", "TOK": "BV"
+      "SNJ": "6J", "APJ": "MM", "JJP": "GK", "SJO": "IJ", "FDA": "JH",
+      "IBX": "FW", "JTA": "NU", "RAC": "RA", "JAC": "JC", "HAC": "HC",
+      "ORC": "OC", "AMX": "RX"
+    };
+
+    const IATA_MAP = {
+      "ANA": "nh", "JAL": "jl", "SKY": "bc", "SFJ": "7g", "ADO": "hd",
+      "SNJ": "6j", "APJ": "mm", "JJP": "gk", "SJO": "ij", "FDA": "jh",
+      "IBX": "fw", "JTA": "nu", "RAC": "ra", "JAC": "jc", "HAC": "hc",
+      "ORC": "oc", "AMX": "rx"
     };
 
     let isStandby = false;
@@ -538,41 +649,95 @@
     }
 
     function getLogoImgTag(airlineCode) {
-      const iata = IATA_MAP[airlineCode] || airlineCode.toLowerCase();
-      return `<div class="airline-logo-box"><img src="https://images.kiwi.com/airlines/128x128/${iata}.png" alt="${airlineCode}"></div>`;
+      const code = IATA_MAP[airlineCode] || airlineCode.toLowerCase();
+      return `<div class="airline-logo-box"><img src="https://images.kiwi.com/airlines/128x128/${code}.png" alt="${airlineCode}"></div>`;
     }
 
-    async function autoFetchWeather() {
-      const destJa = document.getElementById('destination').value;
+    // Open-Meteo API を利用した到着地の天気・気温自動取得
+    async function onDestinationChange() {
+      const select = document.getElementById('destination');
+      const selectedOption = select.options[select.selectedIndex];
+      const lat = selectedOption.getAttribute('data-lat');
+      const lon = selectedOption.getAttribute('data-lon');
+
+      if (!lat || !lon) {
+        // 緯度経度未設定の小規模空港の場合はダミー値を設定
+        document.getElementById('weather_temp').value = "25°C";
+        document.getElementById('weather_temp_min').value = "18°C";
+        document.getElementById('disp_weather_icon').innerText = "☁️";
+        return;
+      }
+
       try {
-        const res = await fetch(`/api/weather?destination=${encodeURIComponent(destJa)}`);
-        const weatherData = await res.json();
-        if (weatherData) {
-          document.getElementById('weather_temp').value = weatherData.temp || '21°C';
+        const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=Asia/Tokyo`);
+        const data = await res.json();
+        if (data && data.daily) {
+          const maxTemp = Math.round(data.daily.temperature_2m_max[0]);
+          const minTemp = Math.round(data.daily.temperature_2m_min[0]);
+          const wcode = data.daily.weathercode[0];
+
+          document.getElementById('weather_temp').value = maxTemp + "°C";
+          document.getElementById('weather_temp_min').value = minTemp + "°C";
+          document.getElementById('disp_weather_icon').innerText = getWeatherIcon(wcode);
         }
       } catch (e) {
-        console.error('天気取得エラー:', e);
+        console.error('天気自動取得エラー:', e);
       }
+    }
+
+    function getWeatherIcon(code) {
+      if (code === 0) return "☀️";
+      if ([1, 2].includes(code)) return "⛅";
+      if (code === 3) return "☁️";
+      if ([51, 53, 55, 61, 63, 65].includes(code)) return "🌧️";
+      if ([71, 73, 75].includes(code)) return "❄️";
+      if ([95, 96, 99].includes(code)) return "⛈️";
+      return "☁️";
     }
 
     function renderData(data) {
       if (!data) return;
       document.getElementById('disp_gate').innerText = data.gate || '';
-      document.getElementById('disp_title_ja').innerText = data.title_ja || '';
+      
+      // ステータス（英語付き＆搭乗中は点滅）
+      const titleJa = data.title_ja || '';
+      const titleEn = data.title_en || '';
+      const titleJaElem = document.getElementById('disp_title_ja');
+      const titleEnElem = document.getElementById('disp_title_en');
+      
+      titleJaElem.innerText = titleJa;
+      titleEnElem.innerText = titleEn;
+
+      if (titleJa.includes("搭乗中")) {
+        titleJaElem.classList.add('blink');
+        titleEnElem.classList.add('blink');
+      } else {
+        titleJaElem.classList.remove('blink');
+        titleEnElem.classList.remove('blink');
+      }
+
       document.getElementById('disp_dest_ja').innerText = data.destination_ja || '';
 
-      // コードシェア便のHTML生成（メイン＋存在すれば2社目）
+      // コードシェア便のHTML生成（自動でキャリアプレフィックスを付与）
+      const mainAirline = data.airline_code || 'ANA';
+      const mainPrefix = AIRLINE_PREFIX[mainAirline] || '';
+      const mainFlightNumStr = mainPrefix + (data.flight_no || '');
+
       let flightsHtml = `
         <div class="flight-group">
-          ${getLogoImgTag(data.airline_code || 'ANA')}
-          <div class="flight-number">${data.flight_no || ''}</div>
+          ${getLogoImgTag(mainAirline)}
+          <div class="flight-number">${mainFlightNumStr}</div>
         </div>
       `;
+
       if (data.co_airline_code && data.co_flight_no) {
+        const coAirline = data.co_airline_code;
+        const coPrefix = AIRLINE_PREFIX[coAirline] || '';
+        const coFlightNumStr = coPrefix + data.co_flight_no;
         flightsHtml += `
           <div class="flight-group">
-            ${getLogoImgTag(data.co_airline_code)}
-            <div class="flight-number">${data.co_flight_no}</div>
+            ${getLogoImgTag(coAirline)}
+            <div class="flight-number">${coFlightNumStr}</div>
           </div>
         `;
       }
@@ -590,41 +755,37 @@
       // お知らせメッセージ
       document.getElementById('disp_notice').innerText = data.notice_message || '';
 
-      // スンバイ用ロゴ
-      const mainAirline = data.airline_code || "ANA";
+      // スタンバイ用ロゴ
       const iata = IATA_MAP[mainAirline] || mainAirline.toLowerCase();
       document.getElementById('disp_standby_logo').src = `https://images.kiwi.com/airlines/128x128/${iata}.png`;
     }
 
-    async function sendUpdate() {
+    function sendUpdate() {
+      const titleSelect = document.getElementById('title_select');
+      const selectedTitleOption = titleSelect.options[titleSelect.selectedIndex];
+      
       let updatedData = {
         gate: document.getElementById('gate').value,
-        title_ja: document.getElementById('title_select').value,
+        title_ja: titleSelect.value,
+        title_en: selectedTitleOption.getAttribute('data-en') || '',
         destination_ja: document.getElementById('destination').value,
         airline_code: document.getElementById('airline_code').value,
-        flight_no: document.getElementById('flight_no').value,
+        flight_no: document.getElementById('flight_no').value.replace(/[^0-9]/g, ''), // 数字のみ抽出
         co_airline_code: document.getElementById('co_airline_code').value,
-        co_flight_no: document.getElementById('co_flight_no').value,
+        co_flight_no: document.getElementById('co_flight_no').value.replace(/[^0-9]/g, ''), // 数字のみ抽出
         departure_time: document.getElementById('departure_time').value,
         changed_time: document.getElementById('changed_time').value,
-        boarding_time: document.getElementById('boarding_time').value,
         weather_icon: document.getElementById('disp_weather_icon').innerText,
         weather_temp: document.getElementById('weather_temp').value,
         weather_temp_min: document.getElementById('weather_temp_min').value,
         notice_message: document.getElementById('notice_message').value
       };
 
-      try {
-        const res = await fetch('/api/update-flight-data', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(updatedData)
-        });
-        const result = await res.json();
-        renderData(result);
-      } catch (e) {
-        console.error('更新エラー:', e);
-      }
+      // 入力された便名欄も数字のみに整えておく
+      document.getElementById('flight_no').value = updatedData.flight_no;
+      document.getElementById('co_flight_no').value = updatedData.co_flight_no;
+
+      renderData(updatedData);
     }
 
     function updateClock() {
@@ -634,17 +795,11 @@
       document.getElementById('disp_clock').innerText = `${h}:${m}`;
     }
 
-    window.onload = async function() {
+    window.onload = function() {
       updateClock();
       setInterval(updateClock, 1000);
-
-      try {
-        const res = await fetch('/api/flight-data');
-        const data = await res.json();
-        renderData(data);
-      } catch (e) {
-        console.error('初期データ取得エラー:', e);
-      }
+      onDestinationChange(); // 初期データの天気取得
+      sendUpdate(); // 初期画面のレンダリング
     }
   </script>
 </body>
