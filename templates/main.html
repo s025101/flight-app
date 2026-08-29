@@ -9,7 +9,8 @@
       margin: 0;
       padding: 0;
       background-color: #111;
-      font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif;
+      /* 本物のFIDS（新ゴ・UD新ゴ系）の雰囲気に寄せるため、UD系や視認性の高いゴシック体を優先指定 */
+      font-family: 'UD Shin Go', 'Shin Go', 'Hiragino Kaku Gothic ProN', 'Meiryo', 'Helvetica Neue', Arial, sans-serif;
       display: flex;
       height: 100vh;
       overflow: hidden;
@@ -178,12 +179,8 @@
       border-bottom: 3px solid #2a2a44;
       transition: background-color 0.3s ease;
     }
-    /* 状態が搭乗中または最終案内のときのヘッダー背景色を黄色に（時計部分は除外） */
     .row-header.alert-bg {
       background-color: #ffcc00 !important;
-    }
-    .row-header.alert-bg .gate-block {
-      /* ゲート部分は必要に応じてそのまま、または連動させる場合 */
     }
     .row-header.alert-bg .title-block {
       background-color: #ffcc00 !important;
@@ -194,7 +191,6 @@
     .row-header.alert-bg .title-text-en {
       color: #b32d00 !important;
     }
-    /* 時計ブロックは元の色のまま（#1b1b2f と白文字）維持 */
     .row-header.alert-bg .clock-block {
       background-color: #1b1b2f !important;
       color: #fff !important;
@@ -211,10 +207,10 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      font-weight: bold;
+      font-weight: 900;
     }
-    .gate-label { font-size: 0.9rem; text-transform: uppercase; line-height: 1; }
-    .gate-number { font-size: 3.2rem; line-height: 1; }
+    .gate-label { font-size: 0.9rem; text-transform: uppercase; line-height: 1; letter-spacing: 0.05em; }
+    .gate-number { font-size: 3.2rem; line-height: 1; font-weight: 900; }
 
     .title-block {
       flex-grow: 1;
@@ -226,8 +222,8 @@
       padding: 0 15px;
       transition: background-color 0.3s ease, color 0.3s ease;
     }
-    .title-text-ja { font-size: 2.5rem; font-weight: bold; letter-spacing: 0.1rem; line-height: 1; }
-    .title-text-en { font-size: 1.5rem; color: #ffcc00; font-weight: bold; letter-spacing: 0.05rem; line-height: 1; }
+    .title-text-ja { font-size: 2.5rem; font-weight: 900; letter-spacing: 0.1rem; line-height: 1; }
+    .title-text-en { font-size: 1.5rem; color: #ffcc00; font-weight: 900; letter-spacing: 0.05rem; line-height: 1; }
 
     .clock-block {
       width: 20%;
@@ -238,7 +234,7 @@
       border-left: 3px solid #2a2a44;
       transition: background-color 0.3s ease, color 0.3s ease;
     }
-    .clock-time { font-size: 3.0rem; font-weight: bold; font-family: monospace; }
+    .clock-time { font-size: 3.0rem; font-weight: bold; font-family: 'Courier New', Courier, monospace; }
 
     /* メイン領域 (行先、コードシェア便情報、天気) */
     .row-main {
@@ -256,7 +252,7 @@
     }
     
     .destination-container { display: flex; align-items: baseline; gap: 20px; }
-    .destination-text-ja { font-size: 4.5rem; font-weight: bold; line-height: 1; }
+    .destination-text-ja { font-size: 4.5rem; font-weight: 900; line-height: 1; letter-spacing: 0.05em; }
     .destination-text-en { font-size: 2.2rem; color: #aaa; font-weight: bold; line-height: 1; }
 
     /* コードシェアを並べるコンテナ */
@@ -285,7 +281,7 @@
       max-width: 100%;
       object-fit: contain;
     }
-    .flight-number { font-size: 3.2rem; font-weight: bold; line-height: 1; }
+    .flight-number { font-size: 3.2rem; font-weight: 900; line-height: 1; letter-spacing: 0.05em; }
 
     /* 右側：天気ブロック */
     .main-right {
@@ -317,11 +313,11 @@
       gap: 15px;
     }
     .time-label { font-size: 1.1rem; color: #aaa; font-weight: bold; }
-    .time-original { font-size: 3.0rem; font-weight: bold; }
+    .time-original { font-size: 3.0rem; font-weight: 900; }
     .time-original.has-change { text-decoration: line-through; color: #888; }
     .time-arrow { font-size: 2.2rem; color: #ffcc00; font-weight: bold; }
     .time-changed-label { font-size: 0.9rem; background-color: #d97706; color: white; padding: 2px 6px; border-radius: 3px; font-weight: bold; }
-    .time-changed-value { font-size: 3.5rem; font-weight: bold; color: #ffcc00; }
+    .time-changed-value { font-size: 3.5rem; font-weight: 900; color: #ffcc00; }
 
     /* 最下部：おしらせスクロール帯 */
     .row-notice {
@@ -329,7 +325,7 @@
       background-color: #ffd700;
       color: #111;
       font-size: 2.0rem;
-      font-weight: bold;
+      font-weight: 900;
       display: flex;
       align-items: center;
       padding: 0 20px;
@@ -638,7 +634,6 @@
   </div>
 
   <script>
-    // 日本の主要旅客航空会社のプレフィックス定義
     const AIRLINE_PREFIX = {
       "ANA": "NH", "JAL": "JL", "SKY": "BC", "SFJ": "7G", "ADO": "HD",
       "SNJ": "6J", "APJ": "MM", "JJP": "GK", "SJO": "IJ", "FDA": "JH",
@@ -734,7 +729,6 @@
       titleJaElem.innerText = titleJa;
       titleEnElem.innerText = titleEn;
 
-      // 「搭乗中」または「最終案内」の場合の点滅とヘッダー背景色変更の処理（時計エリアは除外）
       if (titleJa.includes("搭乗中") || titleJa.includes("最終案内")) {
         titleJaElem.classList.add('blink');
         titleEnElem.classList.add('blink');
