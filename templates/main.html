@@ -571,20 +571,26 @@
           <input type="text" id="weather_temp_min" value="21°C">
         </div>
       </div>
+
+      <!-- iPhone対応：メッセージ選択と手入力を分離 -->
       <div class="form-group">
-        <label>メッセージ（選択または手入力）</label>
-        <input type="text" id="notice_message" list="notice_suggestions" value="" placeholder="選択または直接入力...">
-        <datalist id="notice_suggestions">
-          <option value="おくれ（使用機材到着おくれのため）">
-          <option value="おくれ（天候不良のため）">
-          <option value="おくれ（機材調整のため）">
-          <option value="おくれ（整備作業のため）">
-          <option value="ただいま優先搭乗を実施しております">
-          <option value="搭乗口が変更になっておりますのでご注意ください">
-          <option value="天候不良のため、条件付きで運航しております">
-          <option value="天候調査中">
-          <option value="引き返しまたは出発地への戻りの可能性がございます">
-        </datalist>
+        <label>メッセージ（選択）</label>
+        <select id="notice_select" onchange="document.getElementById('notice_message').value = this.value;">
+          <option value="" selected>（選択してください）</option>
+          <option value="おくれ（使用機材到着おくれのため）">おくれ（使用機材到着おくれのため）</option>
+          <option value="おくれ（天候不良のため）">おくれ（天候不良のため）</option>
+          <option value="おくれ（機材調整のため）">おくれ（機材調整のため）</option>
+          <option value="おくれ（整備作業のため）">おくれ（整備作業のため）</option>
+          <option value="ただいま優先搭乗を実施しております">ただいま優先搭乗を実施しております</option>
+          <option value="搭乗口が変更になっておりますのでご注意ください">搭乗口が変更になっておりますのでご注意ください</option>
+          <option value="天候不良のため、条件付きで運航しております">天候不良のため、条件付きで運航しております</option>
+          <option value="天候調査中">天候調査中</option>
+          <option value="引き返しまたは出発地への戻りの可能性がございます">引き返しまたは出発地への戻りの可能性がございます</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>メッセージ（手入力・編集用）</label>
+        <input type="text" id="notice_message" value="" placeholder="直接入力もできます">
       </div>
 
       <button type="button" class="btn-primary" onclick="sendUpdate()">設定を案内に反映</button>
