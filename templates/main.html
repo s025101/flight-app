@@ -572,7 +572,6 @@
         </div>
       </div>
 
-      <!-- iPhone対応：メッセージ選択と手入力を分離 -->
       <div class="form-group">
         <label>メッセージ（選択）</label>
         <select id="notice_select" onchange="document.getElementById('notice_message').value = this.value;">
@@ -689,8 +688,16 @@
       }
     }
 
+    // ローカル読み込みに失敗したらKiwi.comのCDNから自動で取得する設定
     function getLogoImgTag(airlineCode) {
-      return `<div class="airline-logo-box"><img src="web/logos/${airlineCode}.png" alt="${airlineCode}" onerror="this.style.display='none'"></div>`;
+      const localSrc = `web/logos/${airlineCode}.png`;
+      const fallbackSrc = `https://images.kiwi.com/airlines/64/${airlineCode}.png`;
+      
+      return `
+        <div class="airline-logo-box">
+          <img src="${localSrc}" alt="${airlineCode}" onerror="this.onerror=null; this.src='${fallbackSrc}';">
+        </div>
+      `;
     }
 
     async function onDestinationChange() {
@@ -817,7 +824,13 @@
         noticeRow.classList.remove('hidden-notice');
       }
 
-      document.getElementById('disp_standby_logo').src = `web/logos/${mainAirline}.png`;
+      // 準備中画面のロゴもローカル失敗時にKiwi.comにフォールバックできるように設定
+      const standbyImg = document.getElementById('disp_standby_logo');
+      standbyImg.src = `web/logos/${mainAirline}.png`;
+      standbyImg.onerror = function() {
+        this.onerror = null;
+        this.src = `https://images.kiwi.com/airlines/64/${mainAirline}.png`;
+      };
     }
 
     function sendUpdate() {
