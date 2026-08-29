@@ -176,7 +176,24 @@
       background-color: #1b1b2f;
       display: flex;
       border-bottom: 3px solid #2a2a44;
+      transition: background-color 0.3s ease;
     }
+    /* 状態が搭乗中または最終案内のときのヘッダー背景色を黄色に */
+    .row-header.alert-bg {
+      background-color: #ffcc00 !important;
+    }
+    .row-header.alert-bg .title-block,
+    .row-header.alert-bg .clock-block {
+      background-color: #ffcc00 !important;
+      color: #111;
+    }
+    .row-header.alert-bg .title-text-en {
+      color: #b32d00 !important;
+    }
+    .row-header.alert-bg .clock-time {
+      color: #111;
+    }
+
     .gate-block {
       width: 18%;
       background-color: #24dc62;
@@ -198,6 +215,7 @@
       gap: 15px;
       background-color: #1b1b2f;
       padding: 0 15px;
+      transition: background-color 0.3s ease, color 0.3s ease;
     }
     .title-text-ja { font-size: 2.5rem; font-weight: bold; letter-spacing: 0.1rem; line-height: 1; }
     .title-text-en { font-size: 1.5rem; color: #ffcc00; font-weight: bold; letter-spacing: 0.05rem; line-height: 1; }
@@ -209,6 +227,7 @@
       justify-content: center;
       align-items: center;
       border-left: 3px solid #2a2a44;
+      transition: background-color 0.3s ease, color 0.3s ease;
     }
     .clock-time { font-size: 3.0rem; font-weight: bold; font-family: monospace; }
 
@@ -562,7 +581,7 @@
       </div>
 
       <!-- ヘッダー -->
-      <div class="row-header">
+      <div class="row-header" id="disp_header_row">
         <div class="gate-block">
           <span class="gate-label">GATE</span>
           <span class="gate-number" id="disp_gate">-</span>
@@ -702,16 +721,20 @@
       const titleEn = data.title_en || '';
       const titleJaElem = document.getElementById('disp_title_ja');
       const titleEnElem = document.getElementById('disp_title_en');
+      const headerRow = document.getElementById('disp_header_row');
       
       titleJaElem.innerText = titleJa;
       titleEnElem.innerText = titleEn;
 
-      if (titleJa.includes("搭乗中")) {
+      // 「搭乗中」または「最終案内」の場合の点滅と背景色変更の処理
+      if (titleJa.includes("搭乗中") || titleJa.includes("最終案内")) {
         titleJaElem.classList.add('blink');
         titleEnElem.classList.add('blink');
+        headerRow.classList.add('alert-bg');
       } else {
         titleJaElem.classList.remove('blink');
         titleEnElem.classList.remove('blink');
+        headerRow.classList.remove('alert-bg');
       }
 
       document.getElementById('disp_dest_ja').innerText = data.destination_ja || '';
