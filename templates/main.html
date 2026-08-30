@@ -829,15 +829,15 @@
         imgElement.dataset.fallbackStep = "1";
         imgElement.src = `/web/logos/${code.toLowerCase()}.png`;
       } else if (step === 1) {
-        // Kiwi.com の 2レター小文字へ
-        imgElement.dataset.fallbackStep = "2";
-        const iata = (AIRLINE_PREFIX[code] || code).toLowerCase();
-        imgElement.src = `https://images.kiwi.com/airlines/64/${iata}.png`;
-      } else {
-        // 最終フォールバック（プレースホルダー）
-        imgElement.src = `https://picsum.photos/seed/${code}/100/40`;
-      }
-    }
+// Kiwi.com の 2レター（またはコード）へ
+    imgElement.dataset.fallbackStep = "2";
+    const iata = AIRLINE_PREFIX[code] || code;
+    imgElement.src = `https://images.kiwi.com/airlines/64/${iata}.png`;
+  } else {
+    // 最終フォールバック（プレースホルダー）
+    imgElement.src = `https://picsum.photos/seed/${code}/100/40`;
+  }
+}
 
     function onDestinationChange() {
       sendUpdate();
