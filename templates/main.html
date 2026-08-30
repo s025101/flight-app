@@ -349,7 +349,6 @@
     }
     .blink { animation: blinkAnimation 1.0s infinite; }
 
-    /* 搭乗中・最終案内用の黄色文字＆点滅スタイル */
     .status-yellow-blink {
       color: #ffeb3b !important;
       animation: blinkAnimation 1.0s infinite;
@@ -803,23 +802,30 @@
       const standbyScreen = document.getElementById('standbyScreen');
       const btn = document.getElementById('btnToggleMode');
       const airlineCode = document.getElementById('airline_code').value;
+      const iataCode = (AIRLINE_PREFIX[airlineCode] || airlineCode).toLowerCase();
 
       if (isStandby) {
         standbyScreen.classList.remove('hidden');
         btn.innerText = "通常画面に戻す";
-        document.getElementById('disp_standby_logo').src = `/web/logos/${airlineCode}.png`;
+        document.getElementById('disp_standby_logo').src = `https://images.kiwi.com/airlines/64/${iataCode}.png`;
       } else {
         standbyScreen.classList.add('hidden');
         btn.innerText = "準備中画面（ロゴ表示）に切り替え";
       }
     }
 
-    // ロゴ画像読み込みエラー時のフォールバック処理（ローカルになければkiwi.comへ）
+    // Kiwi.comのロゴ画像を確実に取得するためのフォールバック付きエラー処理
     function handleLogoError(imgElement, code) {
-      if (!imgElement.dataset.fallback) {
-        imgElement.dataset.fallback = "true";
-        imgElement.src = `https://images.kiwi.com/airlines/64/${code}.png`;
+      const iataCode = (AIRLINE_PREFIX[code] || code).toLowerCase();
+      if (!imgElement.dataset.fallbackStep) {
+        imgElement.dataset.fallbackStep = "1";
+        imgElement.src = `https://images.kiwi.com/airlines/64/${iataCode}.png`;
+      } else if (imgElement.dataset.fallbackStep === "1") {
+        imgElement.dataset.fallbackStep = "2";
+        // 大文字のIATAコードでも試す
+        imgElement.src = `https://images.kiwi.com/airlines/64/${iataCode.toUpperCase()}.png`;
       } else {
+        // 最終的なプレースホルダー画像
         imgElement.src = `https://picsum.photos/seed/${code}/100/40`;
       }
     }
@@ -878,7 +884,6 @@
 
       const titleBlock = document.getElementById('disp_title_block');
       
-      // 「搭乗中」または「最終案内」の場合は黄色文字＆点滅
       if (titleJa === '搭乗中' || titleJa === '最終案内') {
         titleBlock.classList.add('status-yellow-blink');
         titleBlock.classList.remove('alert-text');
@@ -904,14 +909,16 @@
       const airlineCode = document.getElementById('airline_code').value;
       const flightNo = document.getElementById('flight_no').value;
       const prefix = AIRLINE_PREFIX[airlineCode] || airlineCode;
+      const iataCode = (prefix).toLowerCase();
 
       const coAirlineCode = document.getElementById('co_airline_code').value;
       const coFlightNo = document.getElementById('co_flight_no').value;
       const coPrefix = AIRLINE_PREFIX[coAirlineCode] || coAirlineCode;
+      const coIataCode = (coPrefix).toLowerCase();
 
       let flightsHtml = `
         <div class="flight-group">
-          <div class="airline-logo-box"><img src="/web/logos/${airlineCode}.png" alt="${airlineCode}" onerror="handleLogoError(this, '${airlineCode}')"></div>
+          <div class="airline-logo-box"><img src="https://images.kiwi.com/airlines/64/${iataCode}.png" alt="${airlineCode}" onerror="handleLogoError(this, '${airlineCode}')"></div>
           <div class="flight-number">${prefix}${flightNo}</div>
         </div>
       `;
@@ -919,7 +926,7 @@
       if (coAirlineCode && coFlightNo) {
         flightsHtml += `
           <div class="flight-group" style="margin-left: 20px;">
-            <div class="airline-logo-box"><img src="/web/logos/${coAirlineCode}.png" alt="${coAirlineCode}" onerror="handleLogoError(this, '${coAirlineCode}')"></div>
+            <div class="airline-logo-box"><img src="https://images.kiwi.com/airlines/64/${coIataCode}.png" alt="${coAirlineCode}" onerror="handleLogoError(this, '${coAirlineCode}')"></div>
             <div class="flight-number" style="font-size: 2.5rem; color: #aaa;">${coPrefix}${coFlightNo}</div>
           </div>
         `;
@@ -958,9 +965,14 @@
         noticeRow.classList.add('hidden-notice');
         noticeText.innerText = "";
       }
+
+      // 準備中画面のロゴも更新
+      if (isStandby) {
+        document.getElementById('disp_standby_logo').src = `https://images.kiwi.com/airlines/64/${iataCode}.png`;
+      }
     }
 
-    // 時計の更新（秒を非表示にして「HH:MM」に変更）
+    // 時計の更新
     function updateClock() {
       const now = new Date();
       const h = String(now.getHours()).padStart(2, '0');
