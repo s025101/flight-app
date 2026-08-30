@@ -803,6 +803,135 @@
         btn.innerText = "▶ パネルを開く";
       }
     }
+
+    function toggleStandbyMode() {
+      isStandby = !isStandby;
+      const standbyScreen = document.getElementById('standbyScreen');
+      const btn = document.getElementById('btnToggleMode');
+      const airlineCode = document.getElementById('airline_code').value;
+
+      if (isStandby) {
+        standbyScreen.classList.remove('hidden');
+        btn.innerText = "通常画面に戻す";
+        document.getElementById('disp_standby_logo').src = `https://picsum.photos/seed/${airlineCode}/300/100`;
+      } else {
+        standbyScreen.classList.add('hidden');
+        btn.innerText = "準備中画面（ロゴ表示）に切り替え";
+      }
+    }
+
+    function onDestinationChange() {
+      // 必要に応じた連動処理
+    }
+
+    function sendUpdate() {
+      // ゲート番号
+      document.getElementById('disp_gate').innerText = document.getElementById('gate').value;
+
+      // ステータス
+      const titleSelect = document.getElementById('title_select');
+      const selectedOption = titleSelect.options[titleSelect.selectedIndex];
+      const titleJa = selectedOption.value;
+      const titleEn = selectedOption.getAttribute('data-en');
+      
+      document.getElementById('disp_title_ja').innerText = titleJa;
+      document.getElementById('disp_title_en').innerText = titleEn;
+
+      const titleBlock = document.getElementById('disp_title_block');
+      if (titleJa === '出発遅延' || titleJa === '欠航' || titleJa === 'ゲート変更') {
+        titleBlock.classList.add('alert-text');
+      } else {
+        titleBlock.classList.remove('alert-text');
+      }
+
+      // 行先
+      const destSelect = document.getElementById('destination');
+      const destOpt = destSelect.options[destSelect.selectedIndex];
+      document.getElementById('disp_dest_ja').innerText = destOpt.value;
+      document.getElementById('disp_dest_en').innerText = destOpt.getAttribute('data-en');
+
+      // 航空会社と便名
+      const airlineCode = document.getElementById('airline_code').value;
+      const flightNo = document.getElementById('flight_no').value;
+      const prefix = AIRLINE_PREFIX[airlineCode] || airlineCode;
+
+      const coAirlineCode = document.getElementById('co_airline_code').value;
+      const coFlightNo = document.getElementById('co_flight_no').value;
+      const coPrefix = AIRLINE_PREFIX[coAirlineCode] || coAirlineCode;
+
+      let flightsHtml = `
+        <div class="flight-group">
+          <div class="airline-logo-box"><img src="https://picsum.photos/seed/${airlineCode}/100/40" alt="${airlineCode}"></div>
+          <div class="flight-number">${prefix}${flightNo}</div>
+        </div>
+      `;
+
+      if (coAirlineCode && coFlightNo) {
+        flightsHtml += `
+          <div class="flight-group" style="margin-left: 20px;">
+            <div class="airline-logo-box"><img src="https://picsum.photos/seed/${coAirlineCode}/100/40" alt="${coAirlineCode}"></div>
+            <div class="flight-number" style="font-size: 2.5rem; color: #aaa;">${coPrefix}${coFlightNo}</div>
+          </div>
+        `;
+      }
+      document.getElementById('disp_flights_container').innerHTML = flightsHtml;
+
+      // 天気
+      document.getElementById('disp_weather_temp').innerText = document.getElementById('weather_temp').value;
+      document.getElementById('disp_weather_temp_min').innerText = document.getElementById('weather_temp_min').value;
+
+      // 時刻・変更
+      const depTime = document.getElementById('departure_time').value;
+      const chgTime = document.getElementById('changed_time').value;
+      const timeContainer = document.getElementById('disp_time_container');
+
+      if (chgTime) {
+        timeContainer.innerHTML = `
+          <span class="time-label">定刻</span>
+          <span class="time-original has-change">${depTime}</span>
+          <span class="time-arrow">→</span>
+          <span class="time-changed-label">変更</span>
+          <span class="time-changed-value">${chgTime}</span>
+        `;
+      } else {
+        timeContainer.innerHTML = `
+          <span class="time-label">定刻</span>
+          <span class="time-original">${depTime}</span>
+        `;
+      }
+
+      // お知らせメッセージ
+      const noticeMsg = document.getElementById('notice_message').value;
+      const noticeRow = document.getElementById('disp_notice_row');
+      const noticeText = document.getElementById('disp_notice');
+
+      if (noticeMsg) {
+        noticeRow.classList.remove('hidden-notice');
+        noticeText.innerText = noticeMsg;
+      } else {
+        noticeRow.classList.add('hidden-notice');
+        noticeText.innerText = "";
+      }
+    }
+
+    // 時計の更新
+    function updateClock() {
+      const now = new Date();
+      const h = String(now.getHours()).padStart(2, '0');
+      const m = String(now.getMinutes()).padStart(2, '0');
+      const s = String(now.getSeconds()).padStart(2, '0');
+      const clockEl = document.getElementById('disp_clock');
+      if (clockEl) {
+        clockEl.innerText = `${h}:${m}:${s}`;
+      }
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // 初期化時に一度反映を実行
+    window.onload = function() {
+      sendUpdate();
+    };
   </script>
 </body>
 </html>
