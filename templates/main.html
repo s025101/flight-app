@@ -399,91 +399,131 @@
         <select id="destination" onchange="onDestinationChange()">
           <optgroup label="北海道">
             <option value="新千歳" data-en="NEW CHITOSE" data-lat="42.775" data-lon="141.692">新千歳 (CTS)</option>
-            <option value="函館" data-en="HAKODATE">函館 (HKD)</option>
-            <option value="旭川" data-en="ASAHIKAWA">旭川 (AKJ)</option>
-            <option value="釧路" data-en="KUSHIRO">釧路 (KUH)</option>
-            <option value="女満別" data-en="MEMANBETSU">女満別 (MMB)</option>
-            <option value="帯広" data-en="OBIHIRO">帯広 (OBO)</option>
-            <option value="稚内" data-en="WAKKANAI">稚内 (WKJ)</option>
-            <option value="中標津" data-en="NAKASHIBETSU">中標津 (SHB)</option>
-            <option value="奥尻" data-en="OKUSHIRI">奥尻 (OIR)</option>
-            <option value="利尻" data-en="RISHIRI">利尻 (RIS)</option>
-            <option value="丘珠" data-en="OKADAMA">丘珠 (OKD)</option>
+            <option value="函館" data-en="HAKODATE" data-lat="41.770" data-lon="140.822">函館 (HKD)</option>
+            <option value="旭川" data-en="ASAHIKAWA" data-lat="43.670" data-lon="142.448">旭川 (AKJ)</option>
+            <option value="釧路" data-en="KUSHIRO" data-lat="43.041" data-lon="144.180">釧路 (KUH)</option>
+            <option value="女満別" data-en="MEMANBETSU" data-lat="43.880" data-lon="144.164">女満別 (MMB)</option>
+            <option value="帯広" data-en="OBIHIRO" data-lat="42.735" data-lon="143.213">帯広 (OBO)</option>
+            <option value="稚内" data-en="WAKKANAI" data-lat="45.405" data-lon="141.802">稚内 (WKJ)</option>
+            <option value="中標津" data-en="NAKASHIBETSU" data-lat="43.577" data-lon="144.965">中標津 (SHB)</option>
+            <option value="奥尻" data-en="OKUSHIRI" data-lat="42.072" data-lon="139.431">奥尻 (OIR)</option>
+            <option value="利尻" data-en="RISHIRI" data-lat="45.406" data-lon="141.183">利尻 (RIS)</option>
+            <option value="丘珠" data-en="OKADAMA" data-lat="43.116" data-lon="141.378">丘珠 (OKD)</option>
           </optgroup>
           <optgroup label="東北">
-            <option value="青森" data-en="AOMORI">青森 (AOJ)</option>
-            <option value="三沢" data-en="MISAWA">三沢 (MSJ)</option>
-            <option value="花巻" data-en="HANAMAKI">花巻 (HNA)</option>
+            <option value="青森" data-en="AOMORI" data-lat="40.725" data-lon="140.690">青森 (AOJ)</option>
+            <option value="三沢" data-en="MISAWA" data-lat="40.704" data-lon="141.369">三沢 (MSJ)</option>
+            <option value="花巻" data-en="HANAMAKI" data-lat="39.431" data-lon="141.130">花巻 (HNA)</option>
             <option value="仙台" data-en="SENDAI" data-lat="38.139" data-lon="140.917">仙台 (SDJ)</option>
-            <option value="山形" data-en="YAMAGATA">山形 (GAJ)</option>
-            <option value="庄内" data-en="SHONAI">庄内 (SYO)</option>
-            <option value="秋田" data-en="AKITA">秋田 (AXT)</option>
-            <option value="大館能代" data-en="ODATE NOSHIRO">大館能代 (ONJ)</option>
-            <option value="福島" data-en="FUKUSHIMA">福島 (FKS)</option>
+            <option value="山形" data-en="YAMAGATA" data-lat="38.411" data-lon="140.372">山形 (GAJ)</option>
+            <option value="庄内" data-en="SHONAI" data-lat="38.811" data-lon="139.789">庄内 (SYO)</option>
+            <option value="秋田" data-en="AKITA" data-lat="39.615" data-lon="140.218">秋田 (AXT)</option>
+            <option value="大館能代" data-en="ODATE NOSHIRO" data-lat="40.187" data-lon="140.375">大館能代 (ONJ)</option>
+            <option value="福島" data-en="FUKUSHIMA" data-lat="37.225" data-lon="140.432">福島 (FKS)</option>
           </optgroup>
           <optgroup label="関東・甲信越">
             <option value="東京（羽田）" data-en="TOKYO HANEDA" data-lat="35.549" data-lon="139.779" selected>羽田 (HND)</option>
             <option value="東京（成田）" data-en="TOKYO NARITA" data-lat="35.771" data-lon="140.392">成田 (NRT)</option>
-            <option value="茨城" data-en="IBARAKI">茨城 (IBR)</option>
-            <option value="新潟" data-en="NIIGATA">新潟 (KIJ)</option>
-            <option value="松本" data-en="MATSUMOTO">松本 (MMJ)</option>
-            <option value="佐渡" data-en="SADO">佐渡 (SDS)</option>
+            <option value="茨城" data-en="IBARAKI" data-lat="36.182" data-lon="140.414">茨城 (IBR)</option>
+            <option value="新潟" data-en="NIIGATA" data-lat="37.956" data-lon="139.117">新潟 (KIJ)</option>
+            <option value="松本" data-en="MATSUMOTO" data-lat="36.165" data-lon="137.922">松本 (MMJ)</option>
+            <option value="佐渡" data-en="SADO" data-lat="38.069" data-lon="138.406">佐渡 (SDS)</option>
           </optgroup>
           <optgroup label="中部・北陸">
             <option value="名古屋（中部）" data-en="CENTRAIR" data-lat="34.858" data-lon="136.805">名古屋（中部） (NGO)</option>
-            <option value="名古屋（小牧）" data-en="NAGOYA KOMAKI">名古屋（小牧） (NKM)</option>
-            <option value="静岡" data-en="SHIZUOKA">静岡 (FSZ)</option>
-            <option value="富山" data-en="TOYAMA">富山 (TOY)</option>
-            <option value="小松" data-en="KOMATSU">小松 (KMQ)</option>
-            <option value="能登" data-en="NOTO">能登 (NTQ)</option>
-            <option value="福井" data-en="FUKUI">福井 (FKJ)</option>
+            <option value="名古屋（小牧）" data-en="NAGOYA KOMAKI" data-lat="35.255" data-lon="136.923">名古屋（小牧） (NKM)</option>
+            <option value="静岡" data-en="SHIZUOKA" data-lat="34.796" data-lon="138.190">静岡 (FSZ)</option>
+            <option value="富山" data-en="TOYAMA" data-lat="36.648" data-lon="137.187">富山 (TOY)</option>
+            <option value="小松" data-en="KOMATSU" data-lat="36.393" data-lon="136.407">小松 (KMQ)</option>
+            <option value="能登" data-en="NOTO" data-lat="37.294" data-lon="136.963">能登 (NTQ)</option>
+            <option value="福井" data-en="FUKUI" data-lat="36.142" data-lon="136.222">福井 (FKJ)</option>
           </optgroup>
           <optgroup label="関西">
             <option value="大阪（伊丹）" data-en="OSAKA ITAMI" data-lat="34.785" data-lon="135.438">大阪（伊丹） (ITM)</option>
             <option value="大阪（関西）" data-en="KANSAI" data-lat="34.434" data-lon="135.244">大阪（関西） (KIX)</option>
-            <option value="神戸" data-en="KOBE">神戸 (UKB)</option>
-            <option value="南紀白浜" data-en="NANKI SHIRAHAMA">南紀白浜 (SHM)</option>
-            <option value="コウノトリ但馬" data-en="TAJIMA">コウノトリ但馬 (TJH)</option>
+            <option value="神戸" data-en="KOBE" data-lat="34.632" data-lon="135.224">神戸 (UKB)</option>
+            <option value="南紀白浜" data-en="NANKI SHIRAHAMA" data-lat="33.664" data-lon="135.362">南紀白浜 (SHM)</option>
+            <option value="コウノトリ但馬" data-en="TAJIMA" data-lat="35.509" data-lon="134.787">コウノトリ但馬 (TJH)</option>
           </optgroup>
           <optgroup label="中国・四国">
             <option value="広島" data-en="HIROSHIMA" data-lat="34.436" data-lon="132.919">広島 (HIJ)</option>
-            <option value="岡山" data-en="OKAYAMA">岡山 (OKJ)</option>
-            <option value="鳥取" data-en="TOTTORI">鳥取 (TTJ)</option>
-            <option value="米子" data-en="YONAGO">米子 (YGJ)</option>
-            <option value="出雲" data-en="IZUMO">出雲 (IZO)</option>
-            <option value="山口宇部" data-en="YAMAGUCHI UBE">山口宇部 (UBJ)</option>
-            <option value="岩国" data-en="IWAKUNI">岩国 (IWK)</option>
-            <option value="萩・石見" data-en="HAGI IWAMI">萩・石見 (IWJ)</option>
-            <option value="高松" data-en="TAKAMATSU">高松 (TAK)</option>
+            <option value="岡山" data-en="OKAYAMA" data-lat="34.757" data-lon="133.855">岡山 (OKJ)</option>
+            <option value="鳥取" data-en="TOTTORI" data-lat="35.515" data-lon="134.164">鳥取 (TTJ)</option>
+            <option value="米子" data-en="YONAGO" data-lat="35.503" data-lon="133.147">米子 (YGJ)</option>
+            <option value="出雲" data-en="IZUMO" data-lat="35.411" data-lon="132.890">出雲 (IZO)</option>
+            <option value="山口宇部" data-en="YAMAGUCHI UBE" data-lat="33.931" data-lon="131.279">山口宇部 (UBJ)</option>
+            <option value="岩国" data-en="IWAKUNI" data-lat="34.145" data-lon="132.238">岩国 (IWK)</option>
+            <option value="萩・石見" data-en="HAGI IWAMI" data-lat="34.680" data-lon="131.783">萩・石見 (IWJ)</option>
+            <option value="高松" data-en="TAKAMATSU" data-lat="34.214" data-lon="134.012">高松 (TAK)</option>
             <option value="松山" data-en="MATSUYAMA" data-lat="33.828" data-lon="132.700">松山 (MYJ)</option>
-            <option value="高知" data-en="KOCHI">高知 (KCZ)</option>
-            <option value="徳島" data-en="TOKUSHIMA">徳島 (TKS)</option>
+            <option value="高知" data-en="KOCHI" data-lat="33.546" data-lon="133.674">高知 (KCZ)</option>
+            <option value="徳島" data-en="TOKUSHIMA" data-lat="34.296" data-lon="134.609">徳島 (TKS)</option>
           </optgroup>
           <optgroup label="九州・沖縄">
             <option value="福岡" data-en="FUKUOKA" data-lat="33.585" data-lon="130.450">福岡 (FUK)</option>
-            <option value="北九州" data-en="KITAKYUSHU">北九州 (KKJ)</option>
-            <option value="佐賀" data-en="SAGA">佐賀 (HSG)</option>
-            <option value="長崎" data-en="NAGASAKI">長崎 (NGS)</option>
+            <option value="北九州" data-en="KITAKYUSHU" data-lat="33.845" data-lon="131.034">北九州 (KKJ)</option>
+            <option value="佐賀" data-en="SAGA" data-lat="33.151" data-lon="130.303">佐賀 (HSG)</option>
+            <option value="長崎" data-en="NAGASAKI" data-lat="32.916" data-lon="129.913">長崎 (NGS)</option>
             <option value="福江" data-en="FUKUE" data-lat="32.668" data-lon="128.831">福江 (FUJ)</option>
-            <option value="対馬" data-en="TSUSHIMA">対馬 (TSJ)</option>
-            <option value="壱岐" data-en="IKI">壱岐 (IKI)</option>
-            <option value="熊本" data-en="KUMAMOTO">熊本 (KMJ)</option>
-            <option value="大分" data-en="OITA">大分 (OIT)</option>
-            <option value="宮崎" data-en="MIYAZAKI">宮崎 (KMI)</option>
-            <option value="鹿児島" data-en="KAGOSHIMA">鹿児島 (KOJ)</option>
-            <option value="種子島" data-en="TANEGASHIMA">種子島 (TGM)</option>
-            <option value="屋久島" data-en="YAKUSHIMA">屋久島 (KUM)</option>
-            <option value="奄美" data-en="AMAMI">奄美 (ASJ)</option>
-            <option value="喜界" data-en="KIKAI">喜界 (KKX)</option>
-            <option value="徳之島" data-en="TOKUNOSHIMA">徳之島 (TKN)</option>
-            <option value="沖永良部" data-en="OKINOERABU">沖永良部 (OKE)</option>
-            <option value="与論" data-en="YORON">与論 (RNJ)</option>
-            <option value="沖縄（那覇）" data-en="OKINAWA" data-lat="26.204" data-lon="127.645">沖縄（那覇 (OKA)</option>
-            <option value="久米島" data-en="KUMEJIMA">久米島 (UEO)</option>
-            <option value="宮古" data-en="MIYAKO">宮古 (MMY)</option>
-            <option value="下地島" data-en="SHIMOJISHIMA">下地島 (SHI)</option>
-            <option value="石垣" data-en="ISHIGAKI">石垣 (ISG)</option>
-            <option value="与那国" data-en="YONAGUNI">与那国 (OGN)</option>
+            <option value="対馬" data-en="TSUSHIMA" data-lat="34.283" data-lon="129.325">対馬 (TSJ)</option>
+            <option value="壱岐" data-en="IKI" data-lat="33.748" data-lon="129.789">壱岐 (IKI)</option>
+            <option value="熊本" data-en="KUMAMOTO" data-lat="32.837" data-lon="130.855">熊本 (KMJ)</option>
+            <option value="大分" data-en="OITA" data-lat="33.479" data-lon="131.737">大分 (OIT)</option>
+            <option value="宮崎" data-en="MIYAZAKI" data-lat="31.877" data-lon="131.445">宮崎 (KMI)</option>
+            <option value="鹿児島" data-en="KAGOSHIMA" data-lat="31.801" data-lon="130.719">鹿児島 (KOJ)</option>
+            <option value="種子島" data-en="TANEGASHIMA" data-lat="30.601" data-lon="130.985">種子島 (TGM)</option>
+            <option value="屋久島" data-en="YAKUSHIMA" data-lat="30.387" data-lon="130.658">屋久島 (KUM)</option>
+            <option value="奄美" data-en="AMAMI" data-lat="28.431" data-lon="129.711">奄美 (ASJ)</option>
+            <option value="喜界" data-en="KIKAI" data-lat="28.322" data-lon="129.932">喜界 (KKX)</option>
+            <option value="徳之島" data-en="TOKUNOSHIMA" data-lat="27.836" data-lon="128.883">徳之島 (TKN)</option>
+            <option value="沖永良部" data-en="OKINOERABU" data-lat="27.429" data-lon="128.707">沖永良部 (OKE)</option>
+            <option value="与論" data-en="YORON" data-lat="27.045" data-lon="128.411">与論 (RNJ)</option>
+            <option value="沖縄（那覇）" data-en="OKINAWA" data-lat="26.204" data-lon="127.645">沖縄（那覇） (OKA)</option>
+            <option value="久米島" data-en="KUMEJIMA" data-lat="26.363" data-lon="126.711">久米島 (UEO)</option>
+            <option value="宮古" data-en="MIYAKO" data-lat="24.783" data-lon="125.295">宮古 (MMY)</option>
+            <option value="下地島" data-en="SHIMOJISHIMA" data-lat="24.827" data-lon="125.145">下地島 (SHI)</option>
+            <option value="石垣" data-en="ISHIGAKI" data-lat="24.401" data-lon="124.243">石垣 (ISG)</option>
+            <option value="与那国" data-en="YONAGUNI" data-lat="24.469" data-lon="122.977">与那国 (OGN)</option>
+          </optgroup>
+          <!-- 海外主要就航地 -->
+          <optgroup label="海外（東アジア・東南アジア）">
+            <option value="ソウル（仁川）" data-en="SEOUL INCHEON" data-lat="37.469" data-lon="126.451">ソウル（仁川） (ICN)</option>
+            <option value="ソウル（金浦）" data-en="SEOUL GIMPO" data-lat="37.558" data-lon="126.790">ソウル（金浦） (GMP)</option>
+            <option value="釜山" data-en="BUSAN" data-lat="35.179" data-lon="128.938">釜山 (PUS)</option>
+            <option value="台北（桃園）" data-en="TAIPEI TAOYUAN" data-lat="25.079" data-lon="121.234">台北（桃園） (TPE)</option>
+            <option value="台北（松山）" data-en="TAIPEI SONGSHAN" data-lat="25.069" data-lon="121.552">台北（松山） (TSA)</option>
+            <option value="高雄" data-en="KAOHSIUNG" data-lat="22.577" data-lon="120.350">高雄 (KHH)</option>
+            <option value="香港" data-en="HONG KONG" data-lat="22.308" data-lon="113.914">香港 (HKG)</option>
+            <option value="上海（浦東）" data-en="SHANGHAI PUDONG" data-lat="31.144" data-lon="121.808">上海（浦東） (PVG)</option>
+            <option value="上海（虹橋）" data-en="SHANGHAI HONGQIAO" data-lat="31.197" data-lon="121.336">上海（虹橋） (SHA)</option>
+            <option value="北京（首都）" data-en="BEIJING CAPITAL" data-lat="40.080" data-lon="116.584">北京（首都） (PEK)</option>
+            <option value="北京（大興）" data-en="BEIJING DAXING" data-lat="39.509" data-lon="116.410">北京（大興） (PKX)</option>
+            <option value="シンガポール" data-en="SINGAPORE" data-lat="1.364" data-lon="103.991">シンガポール (SIN)</option>
+            <option value="バンコク" data-en="BANGKOK" data-lat="13.690" data-lon="100.750">バンコク (BKK)</option>
+            <option value="クアラルンプール" data-en="KUALA LUMPUR" data-lat="2.745" data-lon="101.709">クアラルンプール (KUL)</option>
+            <option value="マニラ" data-en="MANILA" data-lat="14.508" data-lon="121.019">マニラ (MNL)</option>
+            <option value="ジャカルタ" data-en="JAKARTA" data-lat="-6.125" data-lon="106.655">ジャカルタ (CGK)</option>
+            <option value="ホーチミン" data-en="HO CHI MINH CITY" data-lat="10.818" data-lon="106.651">ホーチミン (SGN)</option>
+            <option value="ハノイ" data-en="HANOI" data-lat="21.221" data-lon="105.807">ハノイ (HAN)</option>
+          </optgroup>
+          <optgroup label="海外（北米・ハワイ）">
+            <option value="ホノルル" data-en="HONOLULU" data-lat="21.318" data-lon="-157.922">ホノルル (HNL)</option>
+            <option value="ロサンゼルス" data-en="LOS ANGELES" data-lat="33.942" data-lon="-118.408">ロサンゼルス (LAX)</option>
+            <option value="サンフランシスコ" data-en="SAN FRANCISCO" data-lat="37.621" data-lon="-122.379">サンフランシスコ (SFO)</option>
+            <option value="ニューヨーク" data-en="NEW YORK JFK" data-lat="40.641" data-lon="-73.778">ニューヨーク (JFK)</option>
+            <option value="シカゴ" data-en="CHICAGO" data-lat="41.974" data-lon="-87.907">シカゴ (ORD)</option>
+            <option value="シアトル" data-en="SEATTLE" data-lat="47.450" data-lon="-122.308">シアトル (SEA)</option>
+            <option value="バンクーバー" data-en="VANCOUVER" data-lat="49.196" data-lon="-123.181">バンクーバー (YVR)</option>
+          </optgroup>
+          <optgroup label="海外（欧州・中東・オセアニア）">
+            <option value="ロンドン" data-en="LONDON HEATHROW" data-lat="51.470" data-lon="-0.454">ロンドン (LHR)</option>
+            <option value="パリ" data-en="PARIS CHARLES DE GAULLE" data-lat="49.009" data-lon="2.547">パリ (CDG)</option>
+            <option value="フランクフルト" data-en="FRANKFURT" data-lat="50.033" data-lon="8.570">フランクフルト (FRA)</option>
+            <option value="ヘルシンキ" data-en="HELSINKI" data-lat="60.317" data-lon="24.963">ヘルシンキ (HEL)</option>
+            <option value="ドバイ" data-en="DUBAI" data-lat="25.253" data-lon="55.365">ドバイ (DXB)</option>
+            <option value="ドーハ" data-en="DOHA" data-lat="25.273" data-lon="51.608">ドーハ (DOH)</option>
+            <option value="シドニー" data-en="SYDNEY" data-lat="-33.946" data-lon="151.177">シドニー (SYD)</option>
+            <option value="メルボルン" data-en="MELBOURNE" data-lat="-37.673" data-lon="144.843">メルボルン (MEL)</option>
           </optgroup>
         </select>
       </div>
@@ -493,23 +533,79 @@
         <div class="form-group">
           <label>運航会社</label>
           <select id="airline_code">
-            <option value="ANA">ANA (全日本空輸)</option>
-            <option value="JAL" selected>JAL (日本航空)</option>
-            <option value="SKY">SKY (スカイマーク)</option>
-            <option value="ADO">ADO (エア・ドゥ)</option>
-            <option value="SNJ">SNJ (ソラシドエア)</option>
-            <option value="SFJ">SFJ (スターフライヤー)</option>
-            <option value="APJ">APJ (ピーチ)</option>
-            <option value="JJP">JJP (ジェットスター・ジャパン)</option>
-            <option value="SJO">SJO (春秋航空日本)</option>
-            <option value="FDA">FDA (フジドリームエアラインズ)</option>
-            <option value="IBX">IBX (アイベックスエアラインズ)</option>
-            <option value="ORC">ORC (オリエンタルエアブリッジ)</option>
-            <option value="AMX">AMX (天草エアライン)</option>
-            <option value="JTA">JTA (日本トランスオーシャン航空)</option>
-            <option value="RAC">RAC (琉球エアーコミューター)</option>
-            <option value="JAC">JAC (日本エアコミューター)</option>
-            <option value="HAC">HAC (北海道エアシステム)</option>
+            <optgroup label="国内線主要">
+              <option value="ANA">ANA (全日本空輸)</option>
+              <option value="JAL" selected>JAL (日本航空)</option>
+              <option value="SKY">SKY (スカイマーク)</option>
+              <option value="ADO">ADO (エア・ドゥ)</option>
+              <option value="SNJ">SNJ (ソラシドエア)</option>
+              <option value="SFJ">SFJ (スターフライヤー)</option>
+              <option value="APJ">APJ (ピーチ)</option>
+              <option value="JJP">JJP (ジェットスター・ジャパン)</option>
+              <option value="SJO">SJO (春秋航空日本)</option>
+              <option value="FDA">FDA (フジドリームエアラインズ)</option>
+              <option value="IBX">IBX (アイベックスエアラインズ)</option>
+              <option value="ORC">ORC (オリエンタルエアブリッジ)</option>
+              <option value="AMX">AMX (天草エアライン)</option>
+              <option value="JTA">JTA (日本トランスオーシャン航空)</option>
+              <option value="RAC">RAC (琉球エアーコミューター)</option>
+              <option value="JAC">JAC (日本エアコミューター)</option>
+              <option value="HAC">HAC (北海道エアシステム)</option>
+            </optgroup>
+            <optgroup label="海外航空会社（アジア・中東）">
+              <option value="KAL">KAL (大韓航空)</option>
+              <option value="AAR">AAR (アシアナ航空)</option>
+              <option value="JNA">JNA (ジンエアー)</option>
+              <option value="TWB">TWB (ティーウェイ航空)</option>
+              <option value="JJA">JJA (チェジュ航空)</option>
+              <option value="CAL">CAL (チャイナエアライン)</option>
+              <option value="EVA">EVA (エバー航空)</option>
+              <option value="SLI">SLI (スターラックス航空)</option>
+              <option value="CCA">CCA (中国国際航空)</option>
+              <option value="CSN">CSN (中国南方航空)</option>
+              <option value="CES">CES (中国東方航空)</option>
+              <option value="CXA">CXA (厦門航空)</option>
+              <option value="SGH">SGH (吉祥航空)</option>
+              <option value="CQH">CQH (春秋航空)</option>
+              <option value="CPA">CPA (キャセイパシフィック航空)</option>
+              <option value="HKE">HKE (香港エクスプレス)</option>
+              <option value="CRK">CRK (グレーターベイ航空)</option>
+              <option value="SIA">SIA (シンガポール航空)</option>
+              <option value="SCO">SCO (スクート)</option>
+              <option value="MAS">MAS (マレーシア航空)</option>
+              <option value="THA">THA (タイ国際航空)</option>
+              <option value="TAX">TAX (タイ・エアアジア X)</option>
+              <option value="VNA">VNA (ベトナム航空)</option>
+              <option value="VJC">VJC (ベトジェットエア)</option>
+              <option value="PAL">PAL (フィリピン航空)</option>
+              <option value="CEB">CEB (セブパシフィック航空)</option>
+              <option value="GIA">GIA (ガルーダ・インドネシア航空)</option>
+              <option value="AIC">AIC (エア・インディア)</option>
+              <option value="UAE">UAE (エミレーツ航空)</option>
+              <option value="ETD">ETD (エティハド航空)</option>
+              <option value="QTR">QTR (カタール航空)</option>
+              <option value="ELY">ELY (エル・アル・イスラエル航空)</option>
+            </optgroup>
+            <optgroup label="海外航空会社（北米・欧州・オセアニア）">
+              <option value="UAL">UAL (ユナイテッド航空)</option>
+              <option value="DAL">DAL (デルタ航空)</option>
+              <option value="AAL">AAL (アメリカン航空)</option>
+              <option value="ACA">ACA (エア・カナダ)</option>
+              <option value="BAW">BAW (ブリティッシュ・エアウェイズ)</option>
+              <option value="VIR">VIR (ヴァージン・アトランティック航空)</option>
+              <option value="AFR">AFR (エールフランス)</option>
+              <option value="DLH">DLH (ルフトハンザドイツ航空)</option>
+              <option value="SWR">SWR (スイスインターナショナルエアラインズ)</option>
+              <option value="AUA">AUA (オーストリア航空)</option>
+              <option value="FIN">FIN (フィンエアー)</option>
+              <option value="KLM">KLM (KLMオランダ航空)</option>
+              <option value="SAS">SAS (スカンジナビア航空)</option>
+              <option value="ANZ">ANZ (ニュージーランド航空)</option>
+              <option value="QFA">QFA (カンタス航空)</option>
+              <option value="JST">JST (ジェットスター)</option>
+              <option value="HAW">HAW (ハワイアン航空)</option>
+              <option value="RAM">RAM (ロイヤル・エア・モロッコ)</option>
+            </optgroup>
           </select>
         </div>
         <div class="form-group">
@@ -540,6 +636,31 @@
             <option value="RAC">RAC</option>
             <option value="JAC">JAC</option>
             <option value="HAC">HAC</option>
+            <option value="KAL">KAL</option>
+            <option value="AAR">AAR</option>
+            <option value="CAL">CAL</option>
+            <option value="EVA">EVA</option>
+            <option value="CCA">CCA</option>
+            <option value="CES">CES</option>
+            <option value="CPA">CPA</option>
+            <option value="SIA">SIA</option>
+            <option value="THA">THA</option>
+            <option value="VNA">VNA</option>
+            <option value="PAL">PAL</option>
+            <option value="UAE">UAE</option>
+            <option value="QTR">QTR</option>
+            <option value="UAL">UAL</option>
+            <option value="DAL">DAL</option>
+            <option value="AAL">AAL</option>
+            <option value="ACA">ACA</option>
+            <option value="BAW">BAW</option>
+            <option value="AFR">AFR</option>
+            <option value="DLH">DLH</option>
+            <option value="FIN">FIN</option>
+            <option value="KLM">KLM</option>
+            <option value="ANZ">ANZ</option>
+            <option value="QFA">QFA</option>
+            <option value="HAW">HAW</option>
           </select>
         </div>
         <div class="form-group">
@@ -654,7 +775,17 @@
       "ANA": "NH", "JAL": "JL", "SKY": "BC", "SFJ": "7G", "ADO": "HD",
       "SNJ": "6J", "APJ": "MM", "JJP": "GK", "SJO": "IJ", "FDA": "JH",
       "IBX": "FW", "JTA": "NU", "RAC": "RA", "JAC": "JC", "HAC": "HC",
-      "ORC": "OC", "AMX": "RX"
+      "ORC": "OC", "AMX": "RX",
+      "KAL": "KE", "AAR": "OZ", "JNA": "LJ", "TWB": "TW", "JJA": "7C",
+      "CAL": "CI", "EVA": "BR", "SLI": "JX", "CCA": "CA", "CSN": "CZ",
+      "CES": "MU", "CXA": "MF", "SGH": "HO", "CQH": "9C", "CPA": "CX",
+      "HKE": "UO", "CRK": "HB", "SIA": "SQ", "SCO": "TR", "MAS": "MH",
+      "THA": "TG", "TAX": "XJ", "VNA": "VN", "VJC": "VJ", "PAL": "PR",
+      "CEB": "5J", "GIA": "GA", "AIC": "AI", "UAE": "EK", "ETD": "EY",
+      "QTR": "QR", "ELY": "LY", "UAL": "UA", "DAL": "DL", "AAL": "AA",
+      "ACA": "AC", "BAW": "BA", "VIR": "VS", "AFR": "AF", "DLH": "LH",
+      "SWR": "LX", "AUA": "OS", "FIN": "AY", "KLM": "KL", "SAS": "SK",
+      "ANZ": "NZ", "QFA": "QF", "JST": "JQ", "HAW": "HA", "RAM": "AT"
     };
 
     let isStandby = false;
@@ -671,212 +802,6 @@
         panel.classList.add('collapsed');
         btn.innerText = "▶ パネルを開く";
       }
-    }
-
-    function toggleStandbyMode() {
-      isStandby = !isStandby;
-      const standbyScreen = document.getElementById('standbyScreen');
-      const btn = document.getElementById('btnToggleMode');
-      if (isStandby) {
-        standbyScreen.classList.remove('hidden');
-        btn.innerText = "通常画面に戻す";
-        btn.style.backgroundColor = "#2563eb";
-      } else {
-        standbyScreen.classList.add('hidden');
-        btn.innerText = "準備中画面に切り替え";
-        btn.style.backgroundColor = "#d97706";
-      }
-    }
-
-    // ローカル読み込みに失敗したらKiwi.comのCDNから自動で取得（IATA 2レターコードを使用するよう修正）
-    function getLogoImgTag(airlineCode) {
-      const iataCode = AIRLINE_PREFIX[airlineCode] || airlineCode;
-      const localSrc = `web/logos/${airlineCode}.png`;
-      const fallbackSrc = `https://images.kiwi.com/airlines/64/${iataCode}.png`;
-      
-      return `
-        <div class="airline-logo-box">
-          <img src="${localSrc}" alt="${airlineCode}" onerror="this.onerror=null; this.src='${fallbackSrc}';">
-        </div>
-      `;
-    }
-
-    async function onDestinationChange() {
-      const select = document.getElementById('destination');
-      const selectedOption = select.options[select.selectedIndex];
-      const lat = selectedOption.getAttribute('data-lat');
-      const lon = selectedOption.getAttribute('data-lon');
-
-      if (!lat || !lon) {
-        document.getElementById('weather_temp').value = "25°C";
-        document.getElementById('weather_temp_min').value = "18°C";
-        document.getElementById('disp_weather_icon').innerText = "☁️";
-        return;
-      }
-
-      try {
-        const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=Asia/Tokyo`);
-        const data = await res.json();
-        if (data && data.daily) {
-          const maxTemp = Math.round(data.daily.temperature_2m_max[0]);
-          const minTemp = Math.round(data.daily.temperature_2m_min[0]);
-          const wcode = data.daily.weathercode[0];
-
-          document.getElementById('weather_temp').value = maxTemp + "°C";
-          document.getElementById('weather_temp_min').value = minTemp + "°C";
-          document.getElementById('disp_weather_icon').innerText = getWeatherIcon(wcode);
-        }
-      } catch (e) {
-        console.error('天気自動取得エラー:', e);
-      }
-    }
-
-    function getWeatherIcon(code) {
-      if (code === 0) return "☀️";
-      if ([1, 2].includes(code)) return "⛅";
-      if (code === 3) return "☁️";
-      if ([51, 53, 55, 61, 63, 65].includes(code)) return "🌧️";
-      if ([71, 73, 75].includes(code)) return "❄️";
-      if ([95, 96, 99].includes(code)) return "⛈️";
-      return "☁️";
-    }
-
-    function renderData(data) {
-      if (!data) return;
-      document.getElementById('disp_gate').innerText = data.gate || '';
-      
-      const titleJa = data.title_ja || '';
-      const titleEn = data.title_en || '';
-      const titleJaElem = document.getElementById('disp_title_ja');
-      const titleEnElem = document.getElementById('disp_title_en');
-      const titleBlock = document.getElementById('disp_title_block');
-      
-      titleJaElem.innerText = titleJa;
-      titleEnElem.innerText = titleEn;
-
-      if (titleJa.includes("搭乗中") || titleJa.includes("最終案内")) {
-        titleJaElem.classList.add('blink');
-        titleEnElem.classList.add('blink');
-        titleBlock.classList.add('alert-text');
-      } else {
-        titleJaElem.classList.remove('blink');
-        titleEnElem.classList.remove('blink');
-        titleBlock.classList.remove('alert-text');
-      }
-
-      document.getElementById('disp_dest_ja').innerText = data.destination_ja || '';
-      document.getElementById('disp_dest_en').innerText = data.destination_en || '';
-
-      const mainAirline = data.airline_code || 'ANA';
-      const mainPrefix = AIRLINE_PREFIX[mainAirline] || '';
-      const mainFlightNumStr = mainPrefix + (data.flight_no || '');
-
-      let flightsHtml = `
-        <div class="flight-group">
-          ${getLogoImgTag(mainAirline)}
-          <div class="flight-number">${mainFlightNumStr}</div>
-        </div>
-      `;
-
-      if (data.co_airline_code && data.co_flight_no) {
-        const coAirline = data.co_airline_code;
-        const coPrefix = AIRLINE_PREFIX[coAirline] || '';
-        const coFlightNumStr = coPrefix + data.co_flight_no;
-        flightsHtml += `
-          <div class="flight-group">
-            ${getLogoImgTag(coAirline)}
-            <div class="flight-number">${coFlightNumStr}</div>
-          </div>
-        `;
-      }
-      document.getElementById('disp_flights_container').innerHTML = flightsHtml;
-
-      const timeContainer = document.getElementById('disp_time_container');
-      const depTime = data.departure_time || '';
-      const changedTime = data.changed_time ? data.changed_time.trim() : '';
-
-      if (changedTime !== "") {
-        timeContainer.innerHTML = `
-          <span class="time-label">定刻</span>
-          <span class="time-original has-change" id="disp_departure_time">${depTime}</span>
-          <span class="time-arrow">➔</span>
-          <span class="time-changed-label">変更時刻</span>
-          <span class="time-changed-value" id="disp_changed_time">${changedTime}</span>
-        `;
-      } else {
-        timeContainer.innerHTML = `
-          <span class="time-label">定刻</span>
-          <span class="time-original" id="disp_departure_time">${depTime}</span>
-        `;
-      }
-
-      document.getElementById('disp_weather_icon').innerText = data.weather_icon || '☀️';
-      document.getElementById('disp_weather_temp').innerText = data.weather_temp || '';
-      document.getElementById('disp_weather_temp_min').innerText = data.weather_temp_min || '';
-
-      const noticeRow = document.getElementById('disp_notice_row');
-      const noticeTextElem = document.getElementById('disp_notice');
-      const noticeMsg = data.notice_message ? data.notice_message.trim() : '';
-      
-      noticeTextElem.innerText = noticeMsg;
-      if (noticeMsg === "") {
-        noticeRow.classList.add('hidden-notice');
-      } else {
-        noticeRow.classList.remove('hidden-notice');
-      }
-
-      // 準備中画面のロゴもIATA 2レターコードを使ってKiwi.comから取得できるように修正
-      const mainIata = AIRLINE_PREFIX[mainAirline] || mainAirline;
-      const standbyImg = document.getElementById('disp_standby_logo');
-      standbyImg.src = `web/logos/${mainAirline}.png`;
-      standbyImg.onerror = function() {
-        this.onerror = null;
-        this.src = `https://images.kiwi.com/airlines/64/${mainIata}.png`;
-      };
-    }
-
-    function sendUpdate() {
-      const titleSelect = document.getElementById('title_select');
-      const selectedTitleOption = titleSelect.options[titleSelect.selectedIndex];
-      const destSelect = document.getElementById('destination');
-      const selectedDestOption = destSelect.options[destSelect.selectedIndex];
-      
-      let updatedData = {
-        gate: document.getElementById('gate').value,
-        title_ja: titleSelect.value,
-        title_en: selectedTitleOption.getAttribute('data-en') || '',
-        destination_ja: destSelect.value,
-        destination_en: selectedDestOption.getAttribute('data-en') || '',
-        airline_code: document.getElementById('airline_code').value,
-        flight_no: document.getElementById('flight_no').value.replace(/[^0-9]/g, ''),
-        co_airline_code: document.getElementById('co_airline_code').value,
-        co_flight_no: document.getElementById('co_flight_no').value.replace(/[^0-9]/g, ''),
-        departure_time: document.getElementById('departure_time').value,
-        changed_time: document.getElementById('changed_time').value,
-        weather_icon: document.getElementById('disp_weather_icon').innerText,
-        weather_temp: document.getElementById('weather_temp').value,
-        weather_temp_min: document.getElementById('weather_temp_min').value,
-        notice_message: document.getElementById('notice_message').value
-      };
-
-      document.getElementById('flight_no').value = updatedData.flight_no;
-      document.getElementById('co_flight_no').value = updatedData.co_flight_no;
-
-      renderData(updatedData);
-    }
-
-    function updateClock() {
-      const now = new Date();
-      const h = String(now.getHours()).padStart(2, '0');
-      const m = String(now.getMinutes()).padStart(2, '0');
-      document.getElementById('disp_clock').innerText = `${h}:${m}`;
-    }
-
-    window.onload = function() {
-      updateClock();
-      setInterval(updateClock, 1000);
-      onDestinationChange();
-      sendUpdate();
     }
   </script>
 </body>
