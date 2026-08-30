@@ -913,25 +913,30 @@
 
   <script>
     const AIRLINE_PREFIX = {
-      "ANA": "NH", "JAL": "JL", "SKY": "BC", "SFJ": "7G", "ADO": "HD",
-      "SNJ": "6J", "APJ": "MM", "JJP": "GK", "SJO": "IJ", "FDA": "JH",
-      "IBX": "FW", "JTA": "NU", "RAC": "RA", "JAC": "JC", "HAC": "HC",
-      "ORC": "OC", "AHX": "RX", "TOK": "BV", "ZIP": "ZG", "AJX": "NQ",
+      // 国内線主要
+      "ANA": "NH", "JAL": "JL", "SKY": "BC", "ADO": "HD", "SNJ": "6J",
+      "SFJ": "7G", "APJ": "MM", "JJP": "GK", "SJO": "IJ", "FDA": "JH",
+      "IBX": "FW", "ORC": "OC", "AMX": "RX", "JTA": "NU", "RAC": "RA",
+      "JAC": "JC", "HAC": "HC", "TOK": "BV", "ZIP": "ZG", "AJX": "NQ",
+      
+      // 海外航空会社（アジア・中東）
       "KAL": "KE", "AAR": "OZ", "JNA": "LJ", "TWB": "TW", "JJA": "7C",
       "CAL": "CI", "EVA": "BR", "SLI": "JX", "CCA": "CA", "CSN": "CZ",
       "CES": "MU", "CXA": "MF", "SGH": "HO", "CQH": "9C", "CPA": "CX",
-      "HKE": "UO", "CRK": "HB", "SIA": "SQ", "SCO": "TR", "MAS": "MH",
-      "THA": "TG", "TAX": "XJ", "VNA": "VN", "VJC": "VJ", "PAL": "PR",
-      "CEB": "5J", "GIA": "GA", "AIC": "AI", "UAE": "EK", "ETD": "EY",
-      "QTR": "QR", "ELY": "LY", 
-      "ASV": "RS", "ESR": "ZE", "AXM": "AK", "OMA": "WY", 
-      "CBJ": "GS", "CBH": "JD", "CDG": "SC", "MXD": "OD", "LNI": "SL",
-      "UAL": "UA", "DAL": "DL", "AAL": "AA", "ETH": "ET",
-      "ACA": "AC", "BAW": "BA", "VIR": "VS", "AFR": "AF", "DLH": "LH",
-      "SWR": "LX", "AUA": "OS", "FIN": "AY", "KLM": "KL", "SAS": "SK",
-      "ANZ": "NZ", "QFA": "QF", "JST": "JQ", "HAW": "HA", "RAM": "AT",
-      "ITY": "AZ", "TTW": "IT", "ABL": "BX", "KOW": "RF", "THY": "TK",
-      "AMX": "AM", "CHH": "HU", "HX": "HX", "APZ": "YP",
+      "HKE": "UO", "HX": "HX", "CRK": "HB", "SIA": "SQ", "SCO": "TR",
+      "MAS": "MH", "THA": "TG", "TAX": "XJ", "VNA": "VN", "VJC": "VJ",
+      "PAL": "PR", "CEB": "5J", "GIA": "GA", "AIC": "AI", "UAE": "EK",
+      "ETD": "EY", "QTR": "QR", "OMA": "WY", "HY": "HY", "KC": "KC",
+      "ELY": "LY", "ASV": "RS", "ESR": "ZE", "D7": "D7", "AK": "AK",
+      "MXD": "OD", "OD": "OD", "LNI": "SL", "TTW": "IT", "ABL": "BX",
+      "KOW": "RF", "CHH": "HU", "APZ": "YP",
+      
+      // 海外航空会社（北米・欧州・オセアニア・アフリカ）
+      "UAL": "UA", "DAL": "DL", "AAL": "AA", "ACA": "AC", "BAW": "BA",
+      "VIR": "VS", "AFR": "AF", "DLH": "LH", "SWR": "LX", "AUA": "OS",
+      "FIN": "AY", "KLM": "KL", "SAS": "SK", "IBE": "IB", "ANZ": "NZ",
+      "QFA": "QF", "JST": "JQ", "HAW": "HA", "TN": "TN", "RAM": "AT",
+      "MSR": "MS", "ITY": "AZ", "THY": "TK", "ETH": "ET", "AMX": "AM"
     };
 
     let isStandby = false;
