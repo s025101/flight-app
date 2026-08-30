@@ -216,7 +216,13 @@
       align-items: center;
       border-left: 3px solid #2a2a44;
     }
-    .clock-time { font-size: 3.0rem; font-weight: bold; font-family: 'Courier New', Courier, monospace; }
+    /* 修正：現在時刻のフォントをゲート番号(.gate-number)と同じ設定に変更 */
+    .clock-time { 
+      font-size: 3.2rem; 
+      line-height: 1; 
+      font-weight: 900; 
+      font-family: 'UD Shin Go', 'Shin Go', 'Hiragino Kaku Gothic ProN', 'Meiryo', 'Helvetica Neue', Arial, sans-serif; 
+    }
 
     /* メイン領域 */
     .row-main {
@@ -912,15 +918,15 @@
         imgElement.dataset.fallbackStep = "1";
         imgElement.src = `/web/logos/${code.toLowerCase()}.png`;
       } else if (step === 1) {
-// Kiwi.com の 2レター（またはコード）へ
-    imgElement.dataset.fallbackStep = "2";
-    const iata = AIRLINE_PREFIX[code] || code;
-    imgElement.src = `https://images.kiwi.com/airlines/64/${iata}.png`;
-  } else {
-    // 最終フォールバック（プレースホルダー）
-    imgElement.src = `https://picsum.photos/seed/${code}/100/40`;
-  }
-}
+        // Kiwi.com の 2レター（またはコード）へ
+        imgElement.dataset.fallbackStep = "2";
+        const iata = AIRLINE_PREFIX[code] || code;
+        imgElement.src = `https://images.kiwi.com/airlines/64/${iata}.png`;
+      } else {
+        // 最終フォールバック（プレースホルダー）
+        imgElement.src = `https://picsum.photos/seed/${code}/100/40`;
+      }
+    }
 
     function onDestinationChange() {
       sendUpdate();
