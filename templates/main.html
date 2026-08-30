@@ -349,6 +349,12 @@
     }
     .blink { animation: blinkAnimation 1.0s infinite; }
 
+    /* 搭乗中・最終案内用の黄色文字＆点滅スタイル */
+    .status-yellow-blink {
+      color: #ffeb3b !important;
+      animation: blinkAnimation 1.0s infinite;
+    }
+
     @media screen and (max-width: 768px) {
       .destination-text-ja {
         font-size: 3.2rem;
@@ -814,7 +820,6 @@
         imgElement.dataset.fallback = "true";
         imgElement.src = `https://images.kiwi.com/airlines/64/${code}.png`;
       } else {
-        // kiwi.comでも読み込めない場合の最終予備（ダミー）
         imgElement.src = `https://picsum.photos/seed/${code}/100/40`;
       }
     }
@@ -834,9 +839,8 @@
           const temp = Math.round(data.current.temperature_2m);
           const wcode = data.current.weather_code;
           
-            // 最高・最低気温（デイリーの今日のもの）
-          let maxTemp = temp + 3; // フォールバック用
-          let minTemp = temp - 3; // フォールバック用
+          let maxTemp = temp + 3;
+          let minTemp = temp - 3;
           if (data.daily && data.daily.temperature_2m_max && data.daily.temperature_2m_min) {
             maxTemp = Math.round(data.daily.temperature_2m_max[0]);
             minTemp = Math.round(data.daily.temperature_2m_min[0]);
@@ -845,7 +849,6 @@
           document.getElementById('disp_weather_temp').innerText = `${maxTemp}°C`;
           document.getElementById('disp_weather_temp_min').innerText = `${minTemp}°C`;
 
-          // 天気コードに応じたアイコン変換
           let icon = "☀️";
           if (wcode >= 1 && wcode <= 3) icon = "⛅";
           else if (wcode >= 45 && wcode <= 48) icon = "🌫️";
@@ -874,10 +877,17 @@
       document.getElementById('disp_title_en').innerText = titleEn;
 
       const titleBlock = document.getElementById('disp_title_block');
-      if (titleJa === '出発遅延' || titleJa === '欠航' || titleJa === 'ゲート変更') {
+      
+      // 「搭乗中」または「最終案内」の場合は黄色文字＆点滅
+      if (titleJa === '搭乗中' || titleJa === '最終案内') {
+        titleBlock.classList.add('status-yellow-blink');
+        titleBlock.classList.remove('alert-text');
+      } else if (titleJa === '出発遅延' || titleJa === '欠航' || titleJa === 'ゲート変更') {
         titleBlock.classList.add('alert-text');
+        titleBlock.classList.remove('status-yellow-blink');
       } else {
         titleBlock.classList.remove('alert-text');
+        titleBlock.classList.remove('status-yellow-blink');
       }
 
       // 行先と天気の緯度経度取得
@@ -890,7 +900,7 @@
       const lon = destOpt.getAttribute('data-lon');
       fetchWeather(lat, lon);
 
-      // 航空会社と便名（ロゴは /web/logos/ を優先、エラー時はkiwi.comへ）
+      // 航空会社と便名
       const airlineCode = document.getElementById('airline_code').value;
       const flightNo = document.getElementById('flight_no').value;
       const prefix = AIRLINE_PREFIX[airlineCode] || airlineCode;
@@ -950,15 +960,14 @@
       }
     }
 
-    // 時計の更新
+    // 時計の更新（秒を非表示にして「HH:MM」に変更）
     function updateClock() {
       const now = new Date();
       const h = String(now.getHours()).padStart(2, '0');
       const m = String(now.getMinutes()).padStart(2, '0');
-      const s = String(now.getSeconds()).padStart(2, '0');
       const clockEl = document.getElementById('disp_clock');
       if (clockEl) {
-        clockEl.innerText = `${h}:${m}:${s}`;
+        clockEl.innerText = `${h}:${m}`;
       }
     }
     setInterval(updateClock, 1000);
