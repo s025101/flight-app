@@ -715,7 +715,7 @@
       
       <div class="standby-screen hidden" id="standbyScreen">
         <div class="standby-logo-box">
-          <img src="" id="disp_standby_logo" alt="AIRLINE LOGO" onerror="handleLogoError(this, document.getElementById('airline_code').value)">
+          <img src="" id="disp_standby_logo" alt="AIRLINE LOGO" onerror="handleLogoError(this)">
         </div>
       </div>
 
@@ -813,33 +813,28 @@
       }
     }
 
-    // ロゴのロード順序：
-    // step 0: ローカル /web/logos/{コード}.png
-    // step 1: ローカル /web/logos/{小文字コード}.png
-    // step 2: Kiwi.com (小文字IATA)
-    // step 3: Kiwi.com (大文字IATA)
-    // step 4: プレースホルダー
+    // まずローカルの /web/logos/{3レター}.PNG を探し、無ければKiwi.comにフォールバック
     function setLogoSrc(imgElement, code) {
       imgElement.dataset.airlineCode = code;
       imgElement.dataset.fallbackStep = "0";
-      imgElement.src = `/web/logos/${code}.png`;
+      imgElement.src = `/web/logos/${code}.PNG`;
     }
 
     function handleLogoError(imgElement) {
       const code = imgElement.dataset.airlineCode || "JAL";
-      const iataCode = (AIRLINE_PREFIX[code] || code).toLowerCase();
       let step = parseInt(imgElement.dataset.fallbackStep || "0", 10);
 
       if (step === 0) {
+        // 小文字の3レター拡張子違いも試す (/web/logos/kal.png など)
         imgElement.dataset.fallbackStep = "1";
         imgElement.src = `/web/logos/${code.toLowerCase()}.png`;
       } else if (step === 1) {
+        // Kiwi.com の 2レター小文字へ
         imgElement.dataset.fallbackStep = "2";
-        imgElement.src = `https://images.kiwi.com/airlines/64/${iataCode}.png`;
-      } else if (step === 2) {
-        imgElement.dataset.fallbackStep = "3";
-        imgElement.src = `https://images.kiwi.com/airlines/64/${iataCode.toUpperCase()}.png`;
+        const iata = (AIRLINE_PREFIX[code] || code).toLowerCase();
+        imgElement.src = `https://images.kiwi.com/airlines/64/${iata}.png`;
       } else {
+        // 最終フォールバック（プレースホルダー）
         imgElement.src = `https://picsum.photos/seed/${code}/100/40`;
       }
     }
@@ -848,7 +843,6 @@
       sendUpdate();
     }
 
-    // 天気情報をOpen-Meteo APIから取得する関数
     async function fetchWeather(lat, lon) {
       if (!lat || !lon) return;
       try {
@@ -884,10 +878,8 @@
     }
 
     function sendUpdate() {
-      // ゲート番号
       document.getElementById('disp_gate').innerText = document.getElementById('gate').value;
 
-      // ステータス
       const titleSelect = document.getElementById('title_select');
       const selectedOption = titleSelect.options[titleSelect.selectedIndex];
       const titleJa = selectedOption.value;
@@ -909,7 +901,6 @@
         titleBlock.classList.remove('status-yellow-blink');
       }
 
-      // 行先と天気の緯度経度取得
       const destSelect = document.getElementById('destination');
       const destOpt = destSelect.options[destSelect.selectedIndex];
       document.getElementById('disp_dest_ja').innerText = destOpt.value;
@@ -919,7 +910,6 @@
       const lon = destOpt.getAttribute('data-lon');
       fetchWeather(lat, lon);
 
-      // 航空会社と便名
       const airlineCode = document.getElementById('airline_code').value;
       const flightNo = document.getElementById('flight_no').value;
       const prefix = AIRLINE_PREFIX[airlineCode] || airlineCode;
@@ -945,14 +935,11 @@
       }
       document.getElementById('disp_flights_container').innerHTML = flightsHtml;
 
-      // ロゴの設定を実行（メイン）
       setLogoSrc(document.getElementById('img_airline_main'), airlineCode);
-      // コードシェアがある場合
       if (coAirlineCode && coFlightNo) {
         setLogoSrc(document.getElementById('img_airline_co'), coAirlineCode);
       }
 
-      // 時刻・変更
       const depTime = document.getElementById('departure_time').value;
       const chgTime = document.getElementById('changed_time').value;
       const timeContainer = document.getElementById('disp_time_container');
@@ -972,7 +959,6 @@
         `;
       }
 
-      // お知らせメッセージ
       const noticeMsg = document.getElementById('notice_message').value;
       const noticeRow = document.getElementById('disp_notice_row');
       const noticeText = document.getElementById('disp_notice');
@@ -985,13 +971,11 @@
         noticeText.innerText = "";
       }
 
-      // 準備中画面のロゴも更新
       if (isStandby) {
         setLogoSrc(document.getElementById('disp_standby_logo'), airlineCode);
       }
     }
 
-    // 時計の更新
     function updateClock() {
       const now = new Date();
       const h = String(now.getHours()).padStart(2, '0');
@@ -1004,7 +988,6 @@
     setInterval(updateClock, 1000);
     updateClock();
 
-    // 初期化時に一度反映を実行
     window.onload = function() {
       sendUpdate();
     };
