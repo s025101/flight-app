@@ -216,7 +216,6 @@
       align-items: center;
       border-left: 3px solid #2a2a44;
     }
-    /* 修正：現在時刻のフォントをゲート番号(.gate-number)と同じ設定に変更 */
     .clock-time { 
       font-size: 3.2rem; 
       line-height: 1; 
@@ -405,7 +404,7 @@
         </div>
       </div>
 
-<div class="form-group">
+      <div class="form-group">
         <label>行先空港</label>
         <select id="destination" onchange="onDestinationChange()">
           <optgroup label="北海道">
@@ -595,9 +594,9 @@
         </select>
       </div>
 
-<div class="section-title">航空会社・便名 (運航会社)</div>
+      <div class="section-title">航空会社・便名 (運航会社)</div>
       <div class="row">
-        <div class="form-group">
+        <div class="form-group" style="flex: 2;">
           <label>運航会社</label>
           <select id="airline_code">
             <optgroup label="国内線主要">
@@ -701,8 +700,7 @@
             </optgroup>
           </select>
         </div>
-      </div>
-        <div class="form-group">
+        <div class="form-group" style="flex: 1;">
           <label>運航会社便名</label>
           <input type="text" id="flight_no" value="303">
         </div>
@@ -710,7 +708,7 @@
 
       <div class="section-title">航空会社・便名（コードシェア）</div>
       <div class="row">
-        <div class="form-group">
+        <div class="form-group" style="flex: 2;">
           <label>コードシェア会社</label>
           <select id="co_airline_code">
             <option value="" selected>なし</option>
@@ -815,7 +813,7 @@
             </optgroup>
           </select>
         </div>
-        <div class="form-group">
+        <div class="form-group" style="flex: 1;">
           <label>コードシェア便名</label>
           <input type="text" id="co_flight_no" value="">
         </div>
@@ -971,7 +969,6 @@
       }
     }
 
-    // まずローカルの /web/logos/{3レター}.PNG を探し、無ければKiwi.comにフォールバック
     function setLogoSrc(imgElement, code) {
       imgElement.dataset.airlineCode = code;
       imgElement.dataset.fallbackStep = "0";
@@ -983,16 +980,13 @@
       let step = parseInt(imgElement.dataset.fallbackStep || "0", 10);
 
       if (step === 0) {
-        // 小文字の3レター拡張子違いも試す (/web/logos/kal.png など)
         imgElement.dataset.fallbackStep = "1";
         imgElement.src = `/web/logos/${code.toLowerCase()}.png`;
       } else if (step === 1) {
-        // Kiwi.com の 2レター（またはコード）へ
         imgElement.dataset.fallbackStep = "2";
         const iata = AIRLINE_PREFIX[code] || code;
         imgElement.src = `https://images.kiwi.com/airlines/64/${iata}.png`;
       } else {
-        // 最終フォールバック（プレースホルダー）
         imgElement.src = `https://picsum.photos/seed/${code}/100/40`;
       }
     }
